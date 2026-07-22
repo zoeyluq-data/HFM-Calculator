@@ -415,13 +415,15 @@ function compute(){
   const asstSuper = Math.min(2, Math.floor(totalUnits/300));
 
   // 11-Month Supervisor (§1321(e)(4)), Visiting Teacher (§1321(e)(5)), and Transportation
-  // Supervisor (§1321(e)(7)) all explicitly instruct DDOE to provide fractional support below
-  // threshold ("districts that do not qualify... shall be provided [the] fractional part").
-  // Modeled as a continuous ratio (units/threshold) rather than floor-to-zero, since floor(u/t)
-  // + the fractional remainder(u/t) collapses to the same value as u/t directly.
-  const supervisor11mo = totalUnits/150;
-  const visitingTeacher = totalUnits/250;
-  const transportSup = distEnroll/7500;
+  // Supervisor (§1321(e)(7)): the statute grants fractional credit only to districts that don't
+  // qualify for even one full position ("support for the fractional part of the FIRST
+  // supervisor" — singular, one-time allowance). Above the first threshold it's strictly whole
+  // positions per full threshold, with no continuing fractional credit for the remainder. So
+  // this must be piecewise, not a continuous ratio: fractional below the first threshold, floored
+  // at and above it.
+  const supervisor11mo = totalUnits < 150 ? totalUnits/150 : Math.floor(totalUnits/150);
+  const visitingTeacher = totalUnits < 250 ? totalUnits/250 : Math.floor(totalUnits/250);
+  const transportSup = distEnroll < 7500 ? distEnroll/7500 : Math.floor(distEnroll/7500);
 
   const bgSupervisor = bgUnits >= 95 ? 1 : 0;
   let foodServiceSup;
