@@ -140,16 +140,19 @@
       <h2 style="margin-top:0">LEA setup</h2>
       <div class="two-col">
         <div>
-          <div class="field-row"><label>LEA name</label><input id="leaName" style="text-align:left" value="Sample LEA"></div>
           <div class="field-row"><label>LEA type</label>
             <select id="leaType">
               <option value="District">District</option>
               <option value="Charter">Charter</option>
             </select>
           </div>
+          <div class="field-row"><label>LEA name</label>
+            <select id="leaSelect" style="text-align:left"></select>
+          </div>
+          <div class="field-row" id="leaCustomRow" style="display:none"><label>LEA name (custom)</label><input id="leaNameCustom" style="text-align:left" value=""></div>
         </div>
         <div>
-          <div class="checkbox-row"><input type="checkbox" id="isVoTech"><label for="isVoTech">County Vocational-Technical district (changes CTE unit divisor from pupil-minutes/27,000 to students/30 — §1703(9)(g))</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="isVoTech"><label for="isVoTech">County Vocational-Technical district (changes CTE unit divisor from pupil-minutes/27,000 to students/30 — §1703(9)(g)). Auto-checked for NCCVT, POLYTECH, and Sussex Tech.</label></div>
           <p class="note">Assistant Superintendent positions are zero for Charter LEAs (business rule confirmed, districts only). Superintendent, Administrative Assistant, Buildings &amp; Grounds Supervisor, Food Services Supervisor, and Reading Cadre are calculated the same way for both District and Charter LEAs per the confirmed rules — see the Register tab for the open Reading Cadre discrepancy against its cited appropriation.</p>
         </div>
       </div>
@@ -157,7 +160,8 @@
 
     <div class="card">
       <h2 style="margin-top:0">Schools</h2>
-      <p class="note">Enter one card per school building. Every school calculates separately; all school results roll up automatically into the LEA totals below. Enter each student once, in their single applicable Base-Model category (Pre-K, K–3, Grades 4–12, Basic, Intensive, or Complex Special Education) to avoid unintended double counting when generating Division I units. Basic, Intensive, and Complex counts are shared between the Base-Model unit calculation and the Operational funding weight below — enter them once per school, not twice. Negative or non-numeric entries are treated as zero; results never display as NaN or Infinity.</p>
+      <p class="note">Pick a real school from the selected LEA below, or choose "Custom / not listed" to name one yourself. Every school calculates separately; all school results roll up automatically into the LEA totals below. Each school card has a <b>Grade span</b> selector that shows only the Base-Model enrollment fields relevant to that school — a High School card won't show Pre-K or K–3 fields, for example — so there's no need for enrollment to be duplicated across cards that don't serve those grades. Basic, Intensive, and Complex Special Education counts are shared between the Base-Model unit calculation and the Operational funding weight below — enter them once per school, not twice. Negative or non-numeric entries are treated as zero; results never display as NaN or Infinity.</p>
+      <div class="field-row" style="max-width:520px"><label>Add school</label><select id="schoolPicker" style="text-align:left"></select></div>
       <div id="schoolsWrap"></div>
       <button class="add-btn" id="addSchoolBtn">+ Add school</button>
     </div>
@@ -362,6 +366,46 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
+// ---------------- Delaware LEA / school directory ----------------
+// Parsed from the district/charter school list supplied 2026-07-22. "Statewide" column and
+// self-referential "X School District" rows were excluded from the school lists.
+const LEA_DATA = {"District": [{"code": "Appo", "name": "Appoquinimink School District", "schools": ["Appoquinimink High School", "Appoquinimink PreSchool Center", "Brick Mill Early Childhood Center", "Brick Mill Elementary School", "Bunker Hill Elementary School", "Cantwells Bridge Middle School", "Cedar Lane Early Childhood Center", "Cedar Lane Elementary School", "Crystal Run Elementary School", "Lorewood Grove Elementary School", "Loss (Olive B.) Elementary School", "Meredith (Everett) Middle School", "Middletown High School", "Odessa High School", "Old State Elementary School", "Redding (Louis L.) Middle School", "Silver Lake Elementary School", "Spring Meadow Early Childhood Center", "Townsend Early Childhood Center", "Townsend Elementary School", "Waters (Alfred G.) Middle School"]}, {"code": "Brandywine", "name": "Brandywine School District", "schools": ["Brandywine High School", "Bush (Charles W.) Pre-School", "Carrcroft Elementary School", "Claymont Elementary School", "Concord High School", "Forwood Elementary School", "Hanby Elementary School", "Harlan (David W. ) Elementary School", "Lancashire Elementary School", "Lombardy Elementary School", "Maple Lane Elementary School", "Mount Pleasant Elementary School", "Mount Pleasant High School", "Springer Middle School", "Talley Middle School", "duPont (Pierre S.) Middle School"]}, {"code": "CR", "name": "Caesar Rodney School District", "schools": ["Allen Frear Elementary School", "Caesar Rodney High School", "David E. Robinson Elementary School", "F. Niel Postlethwait Middle School", "Fred Fifer III Middle School", "J. Ralph McIlvaine Early Childhood Center", "John S. Charlton School", "Magnolia Middle School", "Nellie Hughes Stokes Elementary School", "Star Hill Elementary School", "W. B. Simpson Elementary School", "W. Reily Brown Elementary School"]}, {"code": "Cape", "name": "Cape Henlopen School District", "schools": ["Beacon Middle School", "Cape Henlopen High School", "Frederick D Thomas Middle School", "H. O. Brittingham Elementary School", "Lewes Elementary School", "Love Creek Elementary School", "Mariner Middle School", "Milton Elementary School", "Rehoboth Elementary School", "Sussex Consortium"]}, {"code": "Capital", "name": "Capital School District", "schools": ["Booker T. Washington Elementary School", "Capital Early Childhood Center", "Central Elementary School", "Dover High School", "East Dover Early Childhood Center", "Fairview Early Childhood Center", "Hartly Elementary School", "Kent County Community School", "Kent County Secondary ILC", "Middle School of Excellence", "Middle School of Innovation", "North Dover Elementary School", "South Dover Elementary School", "Towne Point Elementary School"]}, {"code": "Christina", "name": "Christina School District", "schools": ["Brader (Henry M.) Elementary School", "Brennen School (The)", "Brookside Elementary School", "Christiana High School", "Christina - Intensive Learning Center", "Christina Early Education Center", "Delaware School for the Deaf School (DSD)", "Douglass School", "Downes (John R.) Elementary School", "Gallaher (Robert S.) Elementary School", "Gauger-Cobbs Middle School", "Glasgow High School", "Jones (Albert H.) Elementary School", "Keene (William B.) Elementary School", "Kirk (George V.) Middle School", "Leasure (May B.) Elementary School", "Maclary (R. Elisabeth) Elementary School", "Marshall (Thurgood) Elementary School", "Maurice Pritchett SR. Academy", "McVey (Joseph M.) Elementary School", "Newark High School", "Oberle (William) Elementary School", "Pulaski Early Education Center", "REACH/CBIP", "Shue-Medill Middle School", "Smith (Jennie E.) Elementary School", "Stubbs Early Education Center", "The Bayard School", "West Park Place Elementary School", "Wilson (Etta J.) Elementary School"]}, {"code": "Colonial", "name": "Colonial School District", "schools": ["Bedford (Gunning) Middle School", "Castle Hills Elementary School", "Downie (Carrie) Elementary School", "Eisenberg (Harry O.) Elementary School", "Leach (John G.) School", "McCullough (Calvin R. ) Middle School", "New Castle Elementary School", "Penn (William) High School", "Pleasantville Elementary School", "Read (George) Middle School", "Southern Elementary School", "The Colwyck Center", "Wilbur (Kathleen H.) Elementary", "Wilmington Manor Elementary School"]}, {"code": "Delmar", "name": "Delmar School District", "schools": ["Delmar High School", "Delmar Middle School"]}, {"code": "DAFB", "name": "DAFB", "schools": ["Dover AFB Choice", "Dover AFB Off Base", "Dover Air Force Base", "Dover Air Force Base Middle School", "Major George S. Welch Elementary School"]}, {"code": "IR", "name": "Indian River School District", "schools": ["Clayton (John M.) Elementary School", "East Millsboro Elementary School", "Ennis (Howard T.) School", "Georgetown Elementary School", "Georgetown Middle School", "Indian River High School", "Indian River Intensive Learning Center", "Long Neck Elementary School", "Lord Baltimore Elementary School", "North Georgetown Elementary School", "Selbyville Middle School", "Showell (Phillip C.) Elementary School", "Southern Delaware School of the Arts", "Sussex Central High School", "Sussex Central Middle"]}, {"code": "Lake", "name": "Lake Forest School District", "schools": ["Chipman (W.T.) Middle School", "Delaware Early Childhood Center", "Lake Forest Central Elementary School", "Lake Forest East Elementary School", "Lake Forest High School", "Lake Forest North Elementary School", "Lake Forest South Elementary School"]}, {"code": "Laurel", "name": "Laurel School District", "schools": ["Laurel Elementary School", "Laurel Middle School", "Laurel Senior High School", "North Laurel Early Learning Academy"]}, {"code": "Milford", "name": "Milford School District", "schools": ["Banneker (Benjamin) Elementary School", "Milford Central Academy", "Milford Middle School", "Milford Senior High School", "Mispillion Elementary", "Morris (Evelyn I.) Early Childhood", "Ross (Lulu M.) Elementary School"]}, {"code": "NCCVT", "name": "New Castle County Vocational-Technical School District", "schools": ["DelCastle ILC", "Delcastle Technical High School", "Hodgson (Paul M.) Vocational Technical High School", "Howard High School of Technology", "St. Georges Technical High School"]}, {"code": "POLYTECH", "name": "POLYTECH School District", "schools": ["POLYTECH High School"]}, {"code": "Red_Clay", "name": "Red Clay Consolidated School District", "schools": ["Baltz (Austin D.) Elementary School", "Brandywine Springs School", "Calloway (Cab) School of the Arts", "Conrad Schools of Science", "Dickinson (John) School", "First State School", "Forest Oak Elementary School", "Heritage Elementary School", "Johnson (Joseph E. Jr) Elementary School", "Lewis (William C.) Dual Language Elementary School", "Linden Hill Elementary School", "Marbrook Elementary School", "McKean (Thomas) High School", "Meadowood Program", "Mote (Anna P.) Elementary School", "North Star Elementary School", "Red Clay Early Years Program", "Richardson Park Elementary School", "Richey Elementary School", "Shortlidge (Evan G.) Academy", "Skyline Middle School", "Stanton Middle School", "Warner Elementary School", "William F. Cooke Jr. Elementary", "duPont (Alexis I.) High School", "duPont (Alexis I.) Middle School", "duPont (H.B.) Middle School"]}, {"code": "Seaford", "name": "Seaford School District", "schools": ["Blades Elementary School", "Frederick Douglass Elementary School", "Seaford Autistic Program", "Seaford Central Elementary School", "Seaford Middle School", "Seaford Senior High School", "Sussex Orthopedic Program", "West Seaford Elementary School"]}, {"code": "Smyrna", "name": "Smyrna School District", "schools": ["Clayton Elementary School", "Clayton Intermediate School", "Moore (John Bassett) School", "North Smyrna Elementary School", "Smyrna Elementary School", "Smyrna High School", "Smyrna Middle School", "Sunnyside Elementary School"]}, {"code": "Sussex_Tech", "name": "Sussex Tech School District", "schools": ["Sussex Tech High School"]}, {"code": "Woodbridge", "name": "Woodbridge School District", "schools": ["Phillis Wheatley Elementary School", "Woodbridge Early Childhood Education Center", "Woodbridge High School", "Woodbridge Middle School"]}], "Charter": [{"code": "Academia_Antonia_Alonso_ Charter_School", "name": "Academia Antonia Alonso Charter School", "schools": ["Academia Junior High", "Academia Primary"]}, {"code": "Academy_of_Dover_Charter_School", "name": "Academy of Dover Charter School", "schools": ["Academy of Dover Early Learning", "Academy of Dover Main"]}, {"code": "Bryan_Allen_Stevenson_School_of_Excellence_Charter_School", "name": "Bryan Allen Stevenson School of Excellence Charter School", "schools": ["Bryan Allen Stevenson School of Excellence Charter School"]}, {"code": "Campus_Community_School_Charter_School", "name": "Campus Community School Charter School", "schools": ["Campus Community Junior High", "Campus Community Primary"]}, {"code": "Charter_School_of_New_Castle", "name": "Charter School of New Castle", "schools": ["New Castle Junior", "New Castle Primary"]}, {"code": "Charter_School_of_Wilmington", "name": "Charter School of Wilmington", "schools": ["Charter School of Wilmington"]}, {"code": "Delaware_Military_Academy_Charter_School", "name": "Delaware Military Academy Charter School", "schools": ["Delaware Military Academy Charter School"]}, {"code": "Early_College_High_School_at_Del_State_Charter_School", "name": "Early College High School at Del State Charter School", "schools": ["Early College High School at Del State Charter School"]}, {"code": "East_Side_Charter_School", "name": "East Side Charter School", "schools": ["East Side Junior", "East Side Primary"]}, {"code": "Edison_Charter_School", "name": "Edison Charter School", "schools": ["Edison Intermediate", "Edison Junior High", "Edison Primary"]}, {"code": "First_State_Military_Academy_Charter_School", "name": "First State Military Academy Charter School", "schools": ["First State Military Academy Charter School"]}, {"code": "First_State_Montessori_Academy_Charter_School", "name": "First State Montessori Academy Charter School", "schools": ["First State Elementary", "First State Middle School"]}, {"code": "Freire_Charter_School_of_Wilmington", "name": "Freire Charter School of Wilmington", "schools": ["Freire Charter School of Wilmington"]}, {"code": "Gateway_Charter_School", "name": "Gateway Charter School", "schools": ["Gateway Primary", "Gateway Secondary"]}, {"code": "Great_Oaks_Charter_School", "name": "Great Oaks Charter School", "schools": ["Great Oaks Charter School"]}, {"code": "Kuumba_Academy_Charter_School", "name": "Kuumba Academy Charter School", "schools": ["Kuumba Junior High", "Kuumba Primary"]}, {"code": "Las_Americas_Aspira_Academy_Charter_School", "name": "Las Americas Aspira Academy Charter School", "schools": ["Aspira High School", "Aspira Junior High", "Aspira Primary"]}, {"code": "MOT_Charter_School", "name": "MOT Charter School", "schools": ["MOT Elementary", "MOT High School", "MOT Middle School"]}, {"code": "Newark_Charter_School", "name": "Newark Charter School", "schools": ["Newark Elementary", "Newark High School", "Newark Intermediate", "Newark Middle School"]}, {"code": "Odyssey_Charter_School", "name": "Odyssey Charter School", "schools": ["Odyssey High School", "Odyssey Intermediate", "Odyssey Middle School", "Odyssey Primary"]}, {"code": "Positive_Outcomes_Charter_School", "name": "Positive Outcomes Charter School", "schools": ["Positive Middle School", "Postive High School"]}, {"code": "Providence_Creek_Academy_Charter_School", "name": "Providence Creek Academy Charter School", "schools": ["Providence Junior High", "Providence Primary"]}, {"code": "Sussex_Academy_Charter_School", "name": "Sussex Academy Charter School", "schools": ["SAS High School", "SAS Junior High", "SAS Primary"]}, {"code": "Sussex_Montessori_School_Charter_School", "name": "Sussex Montessori School Charter School", "schools": ["Sussex Montessori School Charter School"]}]};
+const VOTECH_CODES = new Set(["NCCVT","POLYTECH","Sussex_Tech"]);
+
+function currentLeaList(){
+  const type = document.getElementById('leaType').value;
+  return LEA_DATA[type] || [];
+}
+function currentLea(){
+  const code = document.getElementById('leaSelect').value;
+  return currentLeaList().find(l=>l.code===code);
+}
+function getLeaName(){
+  const custom = document.getElementById('leaNameCustom');
+  if(document.getElementById('leaSelect').value === '__other__') return custom.value || 'Custom LEA';
+  const lea = currentLea();
+  return lea ? lea.name : 'Custom LEA';
+}
+
+function populateLeaOptions(){
+  const sel = document.getElementById('leaSelect');
+  const list = currentLeaList();
+  sel.innerHTML = list.map(l=>`<option value="${l.code}">${l.name}</option>`).join('') + `<option value="__other__">Other / not listed…</option>`;
+  document.getElementById('leaCustomRow').style.display = 'none';
+  document.getElementById('leaNameCustom').value = '';
+  populateSchoolPicker();
+  const isVoTechBox = document.getElementById('isVoTech');
+  const code = sel.value;
+  isVoTechBox.checked = VOTECH_CODES.has(code);
+}
+
+function populateSchoolPicker(){
+  const picker = document.getElementById('schoolPicker');
+  const lea = currentLea();
+  const opts = lea ? lea.schools.map(s=>`<option value="${s}">${s}</option>`) : [];
+  picker.innerHTML = opts.join('') + `<option value="__custom__">Custom / not listed…</option>`;
+}
+
 // ---------------- PEFC constants ----------------
 const OPP_POOL = 163000000;
 const OPP_STATEWIDE_WEIGHTED = 32909.315;
@@ -375,37 +419,73 @@ const OP_RATE = OP_POOL / OP_STATEWIDE_WEIGHTED; // full precision, used interna
 let schoolCount = 0;
 const schools = {};
 
-function addSchool(name){
+// Grade-span options control which Base-Model enrollment fields are shown on a school card.
+// This is what prevents e.g. a High School card from displaying (and inviting entry into)
+// Pre-K or K-3 fields it will never use.
+const GRADE_SPANS = {
+  prek:   {label:"Pre-K only",                 groups:["prek"]},
+  k3:     {label:"Elementary (K–3)",            groups:["k3"]},
+  prek3:  {label:"Early Childhood (Pre-K–3)",   groups:["prek","k3"]},
+  g412:   {label:"Middle / High (Grades 4–12)", groups:["g412"]},
+  k8:     {label:"K–8",                         groups:["k3","g412"]},
+  full:   {label:"Full span (Pre-K–12)",        groups:["prek","k3","g412"]},
+  custom: {label:"Custom / show all fields",    groups:["prek","k3","g412"]},
+};
+
+function guessSpanFromName(name){
+  const n = (name||'').toLowerCase();
+  if(/pre-?school|pre-?k|early (childhood|learning|education)/.test(n)) return 'prek';
+  if(/high school/.test(n)) return 'g412';
+  if(/middle|intermediate|junior/.test(n)) return 'g412';
+  if(/elementary|primary/.test(n)) return 'k3';
+  return 'custom';
+}
+
+function applyGradeSpan(div, spanKey){
+  const span = GRADE_SPANS[spanKey] || GRADE_SPANS.custom;
+  div.querySelectorAll('[data-span-group]').forEach(el=>{
+    const grp = el.dataset.spanGroup;
+    el.style.display = (grp === 'always' || span.groups.includes(grp)) ? '' : 'none';
+  });
+}
+
+function addSchool(name, spanGuess){
   schoolCount++;
   const id = 's'+schoolCount;
-  schools[id] = {name: name || `School ${schoolCount}`};
+  const finalName = name || `School ${schoolCount}`;
+  const finalSpan = spanGuess || guessSpanFromName(finalName);
+  schools[id] = {name: finalName};
   const wrap = document.getElementById('schoolsWrap');
   const div = document.createElement('div');
   div.className = 'school-card';
   div.id = id;
+  const spanOptions = Object.keys(GRADE_SPANS).map(k=>`<option value="${k}" ${k===finalSpan?'selected':''}>${GRADE_SPANS[k].label}</option>`).join('');
   div.innerHTML = `
     <div class="school-head">
-      <input class="name" value="${schools[id].name}" data-field="name">
+      <input class="name" value="${finalName}" data-field="name">
       <button class="remove-btn" data-remove="${id}">Remove</button>
     </div>
+    <div class="field-row" style="max-width:340px"><label>Grade span</label><select class="grade-span">${spanOptions}</select></div>
     <div class="subhead">Base-Model enrollment (Division I units)</div>
     <div class="grid4">
-      <div>
+      <div data-span-group="prek">
         <div class="field-row"><label>Pre-K regular enrollment</label><input type="number" min="0" value="0" data-field="prek"></div>
+      </div>
+      <div data-span-group="k3">
         <div class="field-row"><label>K–3 regular enrollment</label><input type="number" min="0" value="0" data-field="k3"></div>
       </div>
-      <div>
+      <div data-span-group="g412">
         <div class="field-row"><label>Grades 4–12 regular enrollment</label><input type="number" min="0" value="0" data-field="g412"></div>
         <div class="checkbox-row"><input type="checkbox" data-field="isCHS"><label>Comprehensive high school (CTE 0.5 deduction, §1703(9)(i))</label></div>
       </div>
-      <div>
+      <div data-span-group="g412">
+        <div class="field-row"><label>CTE pupil-minutes/week (or vo-tech student count)</label><input type="number" min="0" value="0" data-field="cte"></div>
+        <div class="field-row"><label>10th grade enrollment (driver ed)</label><input type="number" min="0" value="0" data-field="g10"></div>
+      </div>
+      <div data-span-group="always">
         <div class="field-row"><label>Basic SpEd enrollment</label><input type="number" min="0" value="0" data-field="basic"></div>
         <div class="field-row"><label>Intensive SpEd enrollment</label><input type="number" min="0" value="0" data-field="intensive"></div>
         <div class="field-row"><label>Complex SpEd enrollment</label><input type="number" min="0" value="0" data-field="complex"></div>
-      </div>
-      <div>
-        <div class="field-row"><label>CTE pupil-minutes/week (or vo-tech student count)</label><input type="number" min="0" value="0" data-field="cte"></div>
-        <div class="field-row"><label>10th grade enrollment (driver ed)</label><input type="number" min="0" value="0" data-field="g10"></div>
       </div>
     </div>
     <div class="subhead">PEFC enrollment (Opportunity &amp; Operational funding)</div>
@@ -418,9 +498,14 @@ function addSchool(name){
     </div>
   `;
   wrap.appendChild(div);
+  applyGradeSpan(div, finalSpan);
 
   div.querySelectorAll('input').forEach(inp=>{
     inp.addEventListener('input', ()=>{ compute(); });
+  });
+  div.querySelector('.grade-span').addEventListener('change', (e)=>{
+    applyGradeSpan(div, e.target.value);
+    compute();
   });
   div.querySelector('[data-remove]').addEventListener('click', ()=>{
     delete schools[id];
@@ -646,15 +731,30 @@ function compute(){
   recalcCost();
 }
 
-document.getElementById('addSchoolBtn').addEventListener('click', ()=>addSchool());
-['isVoTech','leaType','leaName'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', compute);
-  document.getElementById(id).addEventListener('change', compute);
+document.getElementById('addSchoolBtn').addEventListener('click', ()=>{
+  const picker = document.getElementById('schoolPicker');
+  if(picker.value === '__custom__' || !picker.value){
+    addSchool();
+  } else {
+    addSchool(picker.value);
+  }
 });
 
+document.getElementById('leaType').addEventListener('change', ()=>{ populateLeaOptions(); compute(); });
+document.getElementById('leaSelect').addEventListener('change', ()=>{
+  const isOther = document.getElementById('leaSelect').value === '__other__';
+  document.getElementById('leaCustomRow').style.display = isOther ? '' : 'none';
+  const isVoTechBox = document.getElementById('isVoTech');
+  isVoTechBox.checked = VOTECH_CODES.has(document.getElementById('leaSelect').value);
+  populateSchoolPicker();
+  compute();
+});
+document.getElementById('leaNameCustom').addEventListener('input', compute);
+document.getElementById('isVoTech').addEventListener('change', compute);
+
 renderRegister();
-addSchool('Sample Elementary School');
-addSchool('Sample High School');
+populateLeaOptions();
+addSchool();
 </script>
 </body>
 </html>
