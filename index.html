@@ -10,14 +10,15 @@
     --amber:#9a6400; --amberbg:#fdf3d9;
     --red:#a4212b; --redbg:#fbe6e7;
     --blue:#1d5fa8; --blueline:#c8dcf0;
+    --confirmed:#1f4e78; --confirmedbg:#d9eaf7;
   }
   *{box-sizing:border-box;}
   body{font-family:"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:0 0 60px;}
   header{background:#12233f;color:#fff;padding:22px 28px;}
   header h1{margin:0 0 4px;font-size:1.35rem;}
   header p{margin:0;color:#c9d6e8;font-size:.88rem;}
-  .wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
-  .banner{background:var(--amberbg);border:1px solid #eccf7e;color:#6b4c00;border-radius:8px;padding:14px 18px;margin:20px 0;font-size:.88rem;line-height:1.5;}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 20px;}
+  .banner{background:var(--amberbg);border:1px solid #eccf7e;color:#6b4c00;border-radius:8px;padding:14px 18px;margin:20px 0;font-size:.88rem;line-height:1.55;}
   .banner b{color:#4a3400;}
   nav{display:flex;gap:6px;margin:18px 0;flex-wrap:wrap;}
   nav button{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:8px 14px;font-size:.85rem;cursor:pointer;color:var(--sub);}
@@ -28,11 +29,12 @@
   h3{font-size:.92rem;margin:18px 0 8px;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;}
   .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px;}
   table{width:100%;border-collapse:collapse;font-size:.82rem;}
-  th{background:#eef2f6;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:.75rem;color:var(--sub);text-transform:uppercase;letter-spacing:.02em;}
+  th{background:#eef2f6;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:.72rem;color:var(--sub);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;}
   td{padding:9px 10px;border-bottom:1px solid #eef1f4;vertical-align:top;}
   tr:last-child td{border-bottom:none;}
   .status{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:600;white-space:nowrap;}
   .status.verified{background:var(--greenbg);color:var(--green);}
+  .status.confirmed{background:var(--confirmedbg);color:var(--confirmed);}
   .status.pending{background:var(--amberbg);color:var(--amber);}
   .status.discrepancy{background:var(--redbg);color:var(--red);}
   .status.empty{background:#eee;color:#777;}
@@ -45,10 +47,11 @@
   .field-row{display:grid;grid-template-columns:1fr 130px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px dashed #eaeef2;}
   .field-row:last-child{border-bottom:none;}
   .field-row label{font-size:.85rem;}
-  .field-row input{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:.85rem;text-align:right;}
+  .field-row input, .field-row select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:.85rem;text-align:right;}
+  .field-row select{text-align:left;}
   .field-row .hint{font-size:.72rem;color:var(--sub);display:block;margin-top:2px;}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
   .school-card{border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px;background:#fcfdfe;}
   .school-card .school-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
   .school-card .school-head input.name{font-size:1rem;font-weight:600;border:none;background:transparent;border-bottom:1px solid transparent;padding:2px 0;width:60%;}
@@ -67,6 +70,11 @@
   .plan-list{font-size:.85rem;line-height:1.6;}
   .plan-list li{margin-bottom:10px;}
   .search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;margin-bottom:12px;font-size:.85rem;}
+  .table-scroll{overflow-x:auto;}
+  .subhead{font-weight:600;font-size:.82rem;margin:14px 0 6px;color:var(--ink);}
+  .rate-box{display:flex;gap:24px;flex-wrap:wrap;margin:10px 0 16px;font-size:.85rem;}
+  .rate-box .stat{background:#f7f9fb;border:1px solid var(--line);border-radius:8px;padding:10px 14px;}
+  .rate-box .stat b{display:block;font-size:1.05rem;color:var(--ink);}
 </style>
 </head>
 <body>
@@ -74,19 +82,21 @@
 <header>
   <div class="wrap">
     <h1>Delaware School Funding Formula Calculator — Draft</h1>
-    <p>Built directly from "Delaware School Funding Formula Technical Reference.xlsx" · Generated July 22, 2026 · Not an official DDOE tool</p>
+    <p>Built directly from "Delaware School Funding Formula Technical Reference.xlsx" · Updated July 22, 2026 · Not an official DDOE tool</p>
   </div>
 </header>
 
 <div class="wrap">
 
   <div class="banner">
-    <b>Read before using this for real numbers:</b> of the <span id="bannerTotal">?</span> business rules in the source workbook, <span id="bannerVerified">?</span> are marked "verified," <span id="bannerNoStatus">?</span> have no status entered, and <span id="bannerEmpty">?</span> funding categories (Instructional Supports, Administrative Support Professionals) have no formula defined at all yet — the workbook only lists them as headers. <span id="bannerDiscrepancy">?</span> rule(s) (Reading Cadre) have a known, unresolved conflict between the Calculator's current logic and the FY2026 appropriations act (HB 225 §322(4)), worth roughly a 2x overstatement statewide. This tool calculates every formula that <i>is</i> defined, labels every line with its verification status and legal citation, and refuses to guess at the rules that aren't defined yet. These counts are computed live from the rule list below, not typed in by hand, so they can't drift out of sync again. See the <b>Business Rule Register</b> tab for the full list and open questions.
+    <b>Status:</b> the register contains <span id="bannerTotal">?</span> rules: <span id="bannerVerified">?</span> legally verified, <span id="bannerConfirmed">?</span> business-rule confirmed with citation work pending, <span id="bannerNoStatus">?</span> pending confirmation, <span id="bannerEmpty">?</span> not yet defined, and <span id="bannerDiscrepancy">?</span> with an open discrepancy. These counts are computed live from the rule list below.
+    <br><br>
+    The calculator implements the documented business rules below plus the PEFC (Public Education Funding Commission) Opportunity and Operational weights. Opportunity and Operational funding estimates use FY2025–26 statewide funding pools ($163,000,000 and $279,026,800) and base rates calculated from those pools at full internal precision, displayed to the nearest cent. Salary amounts in the cost roll-up remain placeholders until official §1305/§1308/§1311 salary schedules are loaded — they are <b>not</b> used anywhere in the Opportunity or Operational funding math. This is not an official DDOE calculator; treat any line still marked "pending," "confirmed — citation pending," or "discrepancy" in the register as a working estimate, not a settled number.
   </div>
 
   <nav>
     <button class="tab-btn active" data-tab="register">Business Rule Register</button>
-    <button class="tab-btn" data-tab="calc">School / District Calculator</button>
+    <button class="tab-btn" data-tab="calc">School / LEA Calculator</button>
     <button class="tab-btn" data-tab="plan">Plan Forward</button>
   </nav>
 
@@ -98,8 +108,9 @@
     </div>
 
     <div class="card">
-      <h2 style="margin-top:0">All business rules (from workbook, row for row)</h2>
+      <h2 style="margin-top:0">Business rule register (workbook rules plus confirmed updates)</h2>
       <input class="search" id="ruleSearch" placeholder="Filter by component, citation, or keyword…">
+      <div class="table-scroll">
       <table id="ruleTable">
         <thead><tr>
           <th style="width:16%">Funding Component</th>
@@ -111,8 +122,10 @@
         </tr></thead>
         <tbody id="ruleBody"></tbody>
       </table>
+      </div>
       <div class="legend">
         <span><span class="dot" style="background:var(--green)"></span>Verified in workbook</span>
+        <span><span class="dot" style="background:#1f4e78"></span>Business rule confirmed; citation pending</span>
         <span><span class="dot" style="background:var(--amber)"></span>Status not yet entered / pending DDOE confirmation</span>
         <span><span class="dot" style="background:var(--red)"></span>Known discrepancy / conflict</span>
         <span><span class="dot" style="background:#999"></span>No formula defined in workbook</span>
@@ -124,52 +137,112 @@
   <section id="calc">
 
     <div class="card">
-      <h2 style="margin-top:0">District setup</h2>
+      <h2 style="margin-top:0">LEA setup</h2>
       <div class="two-col">
         <div>
-          <div class="field-row"><label>District name</label><input id="distName" style="text-align:left" value="Sample School District"></div>
-          <div class="checkbox-row"><input type="checkbox" id="isVoTech"><label for="isVoTech">County Vocational-Technical district (changes CTE unit divisor from pupil-minutes/27,000 to students/30 — §1703(9)(g))</label></div>
-          <div class="field-row"><label>Schools with active lunch programs (district-wide count)</label><input id="lunchSchools" type="number" value="0"></div>
-          <div class="field-row"><label>Building units for grounds threshold (§1321(14), needs ≥95)</label><input id="bgUnits" type="number" value="0"></div>
+          <div class="field-row"><label>LEA name</label><input id="leaName" style="text-align:left" value="Sample LEA"></div>
+          <div class="field-row"><label>LEA type</label>
+            <select id="leaType">
+              <option value="District">District</option>
+              <option value="Charter">Charter</option>
+            </select>
+          </div>
         </div>
         <div>
-          <div class="field-row"><label>Total district enrollment (all grades, for transportation supervisor §1321(e)(7))</label><input id="distEnroll" type="number" value="0"></div>
-          <div class="checkbox-row"><input type="checkbox" id="includeReadingCadre"><label for="includeReadingCadre">Include Reading Cadre line in totals despite the open BR-CO-009 discrepancy (not recommended until DDOE confirms)</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="isVoTech"><label for="isVoTech">County Vocational-Technical district (changes CTE unit divisor from pupil-minutes/27,000 to students/30 — §1703(9)(g))</label></div>
+          <p class="note">Assistant Superintendent positions are zero for Charter LEAs (business rule confirmed, districts only). Superintendent, Administrative Assistant, Buildings &amp; Grounds Supervisor, Food Services Supervisor, and Reading Cadre are calculated the same way for both District and Charter LEAs per the confirmed rules — see the Register tab for the open Reading Cadre discrepancy against its cited appropriation.</p>
         </div>
       </div>
     </div>
 
     <div class="card">
       <h2 style="margin-top:0">Schools</h2>
-      <p class="note">Enter one card per school building. Division I units (§1703) are calculated per school; principal, assistant principal, and nurse positions are allocated per building. Superintendent, directors, supervisors, and assistant superintendents are calculated once at the district level below, from the sum of every school's units.</p>
+      <p class="note">Enter one card per school building. Every school calculates separately; all school results roll up automatically into the LEA totals below. Enter each student once, in their single applicable Base-Model category (Pre-K, K–3, Grades 4–12, Basic, Intensive, or Complex Special Education) to avoid unintended double counting when generating Division I units. Basic, Intensive, and Complex counts are shared between the Base-Model unit calculation and the Operational funding weight below — enter them once per school, not twice. Negative or non-numeric entries are treated as zero; results never display as NaN or Infinity.</p>
       <div id="schoolsWrap"></div>
       <button class="add-btn" id="addSchoolBtn">+ Add school</button>
     </div>
 
     <div class="card">
-      <h2 style="margin-top:0">School-level results</h2>
+      <h2 style="margin-top:0">1. School Division I units</h2>
+      <div class="table-scroll">
+      <table class="results-table" id="unitsTable">
+        <thead><tr>
+          <th>School</th><th class="num">Pre-K</th><th class="num">K–3</th><th class="num">Gr 4–12</th>
+          <th class="num">Basic</th><th class="num">Intensive</th><th class="num">Complex</th><th class="num">CTE</th>
+          <th class="num">Total Units</th>
+        </tr></thead>
+        <tbody id="unitsBody"></tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">2. School-level positions</h2>
       <table class="results-table" id="schoolResultsTable">
         <thead><tr>
           <th>School</th><th class="num">Div I Units</th><th class="num">Principal FTE</th>
-          <th class="num">Asst. Principal FTE</th><th class="num">Nurse FTE</th><th class="num">CTE Units</th>
+          <th class="num">Asst. Principal FTE</th><th class="num">Nurse FTE</th>
         </tr></thead>
         <tbody id="schoolResultsBody"></tbody>
       </table>
     </div>
 
     <div class="card">
-      <h2 style="margin-top:0">District-level results</h2>
-      <table class="results-table">
-        <thead><tr><th>Position / Line</th><th class="cite" style="width:16%">Citation</th><th>Status</th><th class="num" style="width:110px">FTE / Units</th></tr></thead>
+      <h2 style="margin-top:0">3. LEA-level positions</h2>
+      <p class="note">Calculated once from total LEA Division I units (all schools summed) or total LEA enrollment, as applicable — not per school.</p>
+      <div class="table-scroll">
+      <table class="results-table" id="districtResultsTable">
+        <thead><tr><th>Position</th><th style="width:32%">Formula used</th><th class="cite" style="width:14%">Citation</th><th>Status</th><th class="num" style="width:100px">FTE / Units</th></tr></thead>
         <tbody id="districtResultsBody"></tbody>
       </table>
+      </div>
     </div>
 
     <div class="card">
-      <h2 style="margin-top:0">Cost roll-up (optional — salary schedules not in source workbook)</h2>
-      <p class="note">§1305 (teacher/principal/AP/nurse base schedule), §1308 (secretarial), and §1311 (custodial) salary tables aren't part of the Technical Reference workbook, so no dollar figures are hardcoded here. Enter your current per-FTE rates below to see a cost total — treat every number in this section as a placeholder until real salary-schedule data is loaded.</p>
+      <h2 style="margin-top:0">4. Opportunity Funding (PEFC)</h2>
+      <div class="rate-box">
+        <div class="stat">Statewide pool<b id="oppPoolLabel">$163,000,000.00</b></div>
+        <div class="stat">Statewide weighted enrollment<b>32,909.315</b></div>
+        <div class="stat">Base rate (full precision, displayed to $0.01)<b id="oppRateLabel">—</b></div>
+      </div>
+      <div class="table-scroll">
+      <table class="results-table" id="oppTable">
+        <thead><tr>
+          <th>School</th>
+          <th class="num">LI Enroll</th><th class="num">LI × 0.675</th>
+          <th class="num">MLL Enroll</th><th class="num">MLL × 0.470</th>
+          <th class="num">Total Weighted</th><th class="num">School Funding</th>
+        </tr></thead>
+        <tbody id="oppBody"></tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">5. Operational Funding (PEFC)</h2>
+      <div class="rate-box">
+        <div class="stat">Statewide pool<b id="opPoolLabel">$279,026,800.00</b></div>
+        <div class="stat">Statewide weighted enrollment<b>85,986.885</b></div>
+        <div class="stat">Base rate (full precision, displayed to $0.01)<b id="opRateLabel">—</b></div>
+      </div>
+      <div class="table-scroll">
+      <table class="results-table" id="opTable">
+        <thead><tr>
+          <th>School</th>
+          <th class="num">Total × 0.200</th><th class="num">LI × 0.675</th><th class="num">MLL × 0.470</th>
+          <th class="num">Basic × 0.480</th><th class="num">Intensive × 0.670</th><th class="num">Complex × 1.540</th>
+          <th class="num">Vocational × 0.200</th><th class="num">Total Weighted</th><th class="num">School Funding</th>
+        </tr></thead>
+        <tbody id="opBody"></tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">6. Salary / FTE cost estimates (optional — salary schedules not in source workbook)</h2>
+      <p class="note">§1305 (teacher/principal/AP/nurse base schedule), §1308 (secretarial), and §1311 (custodial) salary tables aren't part of the Technical Reference workbook, so no dollar figures are hardcoded here. Enter your current per-FTE rates below to see a cost total. These rates are never used in the Opportunity or Operational funding calculations above — those are driven entirely by PEFC weighted enrollment and the statewide base rates.</p>
       <table class="results-table" id="costTable">
-        <thead><tr><th>Position</th><th class="num">FTE (district total)</th><th class="num">Rate per FTE ($)</th><th class="num">Cost ($)</th></tr></thead>
+        <thead><tr><th>Position</th><th class="num">FTE (LEA total)</th><th class="num">Rate per FTE ($)</th><th class="num">Cost ($)</th></tr></thead>
         <tbody id="costBody"></tbody>
         <tfoot><tr class="total"><td colspan="3">Total (excludes any unpriced / TBD lines)</td><td class="num" id="costTotal">$0</td></tr></tfoot>
       </table>
@@ -182,27 +255,28 @@
     <div class="card">
       <h2 style="margin-top:0">Plan forward, based on the meeting</h2>
       <ol class="plan-list">
-        <li><b>Close the "no status" gap before trusting outputs.</b> 7 of 20 rules in the workbook (Director, 11-Month Supervisor, Food Services Supervisor, Transportation Supervisor, Reading Cadre, Assistant Superintendent, Visiting Teacher, Driver Ed Teacher) have no entry in the Status column — meaning nobody has signed off that the "Implementable Business Rule" wording matches the statute. Get each one marked verified/pending/rejected by the business owner named in Sheet1 Q2 before the calculator ships numbers anyone relies on.</li>
-        <li><b>Resolve BR-CO-009 (Reading Cadre) first — it's the one with a live dollar impact.</b> The workbook itself documents a ~2x gap between the Calculator's $4.13M output and the $2.06M appropriation. This isn't a documentation nit, it's a formula bug with budget consequences. Get DDOE's confirmation on (a) the charter exclusion, (b) the §1707 per-unit equalization value replacing the flat $96,155, before anything downstream uses this line.</li>
-        <li><b>Fill in the two empty categories.</b> "Instructional Supports" and "Administrative Support Professionals" are listed as headers only — no formula, no citation, no business rule. Per Sheet1 Q3, several of these (Math Coaches, Early Literacy Coaches, Related Services, Opportunity Funding) are appropriation-funded line items, not Title 14 unit-generated positions, so they won't fit the same unit-based calculation pattern as the rest of this sheet. They need their own row structure (appropriation amount, distribution method, eligible LEA type) before they can go in a calculator.</li>
-        <li><b>Load the missing salary schedules.</b> Every compensation-type rule (principal, AP, superintendent, nurse, custodian, secretary) references §1305 / §1308 / §1311 dollar tables that aren't in this workbook. Without them the calculator can generate FTE counts but not costs. That's a second data-gathering task, separate from the unit-count rules.</li>
-        <li><b>Wire the "tie every rule to Code" vision incrementally, not all at once.</b> This calculator already links each rule's Column I citation straight to delcode.delaware.gov. The next layer — actual verification (e.g., pulling statute text and diffing it against the "Implementable Business Rule" wording automatically) — is worth scoping as a follow-on, but don't block the FTE/unit calculator on it. Ship what's citation-linked-but-manually-verified now; automate the verification step later once you know which rules keep drifting from statute (Reading Cadre suggests this will happen again).</li>
-        <li><b>Decide who owns updating the workbook itself.</b> Sheet1 Q2 asks this and it's still open. Until there's a named business owner for interpreting/approving each rule, every fix to this calculator is provisional — someone needs authority to say "yes, this implementation is correct" or the tool just re-encodes the same disputed logic in a new format.</li>
+        <li><b>Close the "no status" gap before trusting outputs.</b> Several rules in the register have no confirmed legal citation or have "citation pending" status — meaning nobody has signed off that the implemented formula matches the statute. Get each one marked verified/confirmed/rejected by a named business owner before the calculator ships numbers anyone relies on.</li>
+        <li><b>Resolve BR-CO-009 (Reading Cadre) first — it's the one with a live dollar impact.</b> The confirmed business rule (1 position per District or Charter) directly conflicts with the cited FY2026 appropriation, which excludes charters and prices the position very differently from the flat rate historically used. Get DDOE's confirmation on the charter-eligibility question and the §1707 equalization value before anything downstream uses this line.</li>
+        <li><b>Fill in the two empty categories.</b> "Instructional Supports" and "Administrative Support Professionals" are listed as headers only — no formula, no citation, no business rule. Several of the likely items (Math Coaches, Early Literacy Coaches, Related Services, Opportunity Funding) may be appropriation-funded line items rather than Title 14 unit-generated positions, so they may not fit the unit-based calculation pattern used elsewhere on this sheet.</li>
+        <li><b>Load the missing salary schedules.</b> Every compensation-type rule (principal, AP, superintendent, nurse, custodian, secretary) references §1305 / §1308 / §1311 dollar tables that aren't in this workbook. Without them the calculator can generate FTE counts and PEFC dollar estimates, but not position-level salary costs.</li>
+        <li><b>Reconcile the Rule Register, the New Rule Updates sheet, and this calculator into one source.</b> As of this update they contain overlapping but not identical information (different schemas, some inconsistent citation/status wording for the same rule). Before the next round of changes, pick one structured source of truth and generate the others from it.</li>
+        <li><b>Decide who owns updating the workbook itself.</b> Until there's a named business owner for interpreting/approving each rule, every fix to this calculator is provisional.</li>
       </ol>
     </div>
   </section>
 
 </div>
 
-<footer>Built from the uploaded Technical Reference workbook. Formulas marked "pending" or "no status" are implemented as literally described in the workbook but have not been confirmed against current statute by DDOE.</footer>
+<footer>Built from the uploaded Technical Reference workbook and confirmed rule updates. Formulas marked "pending," "confirmed — citation pending," or "discrepancy" have not been fully confirmed against current statute by DDOE.</footer>
 
 <script>
 const RULES = [
-{component:"K–3 Regular Education",type:"Unit",formula:"1 position per 16.2 students",citation:"14 Del. C. §1703(a)(2)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"A student shall be counted in the K–3 regular education unit if enrolled in K–3 and not counted in the basic, intensive, or complex unit."},
-{component:"Grades 4–12 Regular Education",type:"Unit",formula:"1 position per 20 students",citation:"14 Del. C. §1703(a)(3)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"A student shall be counted in the Grades 4–12 unit if enrolled in grades 4–12 and not eligible for special education."},
-{component:"Basic Special Education",type:"Unit",formula:"1 position per 8.4 students",citation:"14 Del. C. §1703(a)(4)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"Enrolled K–12, eligible for special education, and not counted in intensive or complex unit."},
-{component:"Intensive Special Education",type:"Unit",formula:"1 position per 6 students",citation:"14 Del. C. §1703(a)(5)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"Enrolled Preschool–12, eligible for special education, needs moderate instructional/behavioral/personal/health support per §1703(d)(5)."},
-{component:"Complex Special Education",type:"Unit",formula:"1 position per 2.6 students",citation:"14 Del. C. §1703(a)(6)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"Enrolled Preschool–12, eligible for special education, needs high level of support per §1703(d)(6)."},
+{component:"Division I Teacher — Pre-K",type:"Unit",formula:"1 position per 8.4 pupils",citation:"Code citation pending",url:"",status:"confirmed",rule:"New rule: eligible Pre-K pupils generate positions at 1 per 8.4 pupils. Districts and charter schools are eligible. Regular Pre-K pupils must remain separate from pupils counted in Basic, Intensive, or Complex Special Education."},
+{component:"K–3 Regular Education",type:"Unit",formula:"1 position per 16.2 students",citation:"14 Del. C. §1703(a)(2)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"Districts and charter schools are eligible. Count K–3 regular education students who are not counted in the Basic, Intensive, or Complex Special Education units."},
+{component:"Grades 4–12 Regular Education",type:"Unit",formula:"1 position per 20 students",citation:"14 Del. C. §1703(a)(3)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"Districts and charter schools are eligible. Count grades 4–12 regular education students who are not identified as eligible for special education and related services."},
+{component:"Basic Special Education",type:"Unit",formula:"1 position per 8.4 students",citation:"14 Del. C. §1703(a)(4) — confirm Pre-K scope",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"confirmed",rule:"New rule: Pre-K–12 Basic Special Education; districts and charter schools are eligible. Do not count pupils assigned to Intensive or Complex Special Education."},
+{component:"Intensive Special Education",type:"Unit",formula:"1 position per 6 students",citation:"14 Del. C. §1703(a)(5)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"confirmed",rule:"New rule: Pre-K–12 Intensive Special Education; districts and charter schools are eligible. Moderate support level is determined under the applicable special-education rules."},
+{component:"Complex Special Education",type:"Unit",formula:"1 position per 2.6 students",citation:"14 Del. C. §1703(a)(6)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"confirmed",rule:"New rule: Pre-K–12 Complex Special Education; districts and charter schools are eligible. High support level is determined under the applicable special-education rules."},
 {component:"Career & Technical Education",type:"Occ-Voc Unit",formula:"1 unit per 27,000 pupil-minutes (or 1 per 30 students for county vo-tech districts)",citation:"14 Del. C. §1703(9)(g)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"One Occupational-Vocational Unit per 27,000 weekly pupil minutes; county vo-tech districts (New Castle, Kent, Sussex) use 1 unit per 30 students instead."},
 {component:"Career & Technical Education",type:"Occ-Voc Unit",formula:"Same as above, double-count allowed",citation:"14 Del. C. §1703(9)(h)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"Students in a DDOE-approved vocational program count toward vocational units even if already counted in a regular unit elsewhere."},
 {component:"Career & Technical Education",type:"Occ-Voc Unit",formula:"Deduct 0.5 regular unit per CTE unit",citation:"14 Del. C. §1703(9)(i)",url:"https://delcode.delaware.gov/title14/c017/index.html",status:"verified",rule:"Occupational-vocational units × 0.5 = units deducted from a comprehensive high school's regular unit entitlement."},
@@ -211,35 +285,37 @@ const RULES = [
 {component:"Assistant Principal",type:"Position",formula:"1 AP at 30 units (0.65 at 25–<30); 2nd AP at 55 units (0.65 at 50–<55); +1 per additional 20 units beyond 55",citation:"14 Del. C. §1307(3)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"verified",rule:"Fractional units are assigned to the school that generated them."},
 {component:"Assistant Principal Salary",type:"Compensation",formula:"Base (§1305) + admin responsibility supplement, paid 12 months",citation:"14 Del. C. §1307(3)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"verified",rule:"Salary schedule not included in this workbook."},
 {component:"Administrative / financial / senior secretaries & clerks",type:"Compensation",formula:"Salary schedule (§1308(a))",citation:"14 Del. C. §1308(a)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"verified",rule:"Administrative Assistant I/II/III, 12-month, per §1308(a) schedule. Schedule not in this workbook."},
+{component:"Administrative Assistant",type:"Position",formula:"1 position per district or charter",citation:"Legal citation pending",url:"",status:"confirmed",rule:"Confirmed new rule: both districts and charter schools are eligible for one Administrative Assistant position."},
 {component:"School Nurse",type:"Position",formula:"1 per 40 Division I state units; min. 1 per facility; 30% partial funding on the fractional remainder",citation:"14 Del. C. §1310(b)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"verified",rule:"If the formula doesn't reach 1 nurse per facility, the gap is funded via §1707/§1716 or local operating funds, not this formula."},
 {component:"School Nurse Salary",type:"Compensation",formula:"Salary schedule (§1305), certificate required",citation:"14 Del. C. §1310(a)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"verified",rule:"Schedule not in this workbook."},
 {component:"Director",type:"Position",formula:"1 for first 200 Division I units + 1 per additional full 100 units, max 6 per district",citation:"14 Del. C. §1321(e)(2)",url:"",status:"no-status",rule:"12-month position. No Status entry in source workbook — treat as pending confirmation."},
 {component:"11-Month Supervisor",type:"Position",formula:"1 per full 150 Division I units; fractional support for districts below threshold",citation:"14 Del. C. §1321(e)(4)",url:"",status:"no-status",rule:"No Status entry in source workbook — pending confirmation."},
-{component:"Buildings & Grounds Supervisor",type:"Position",formula:"1 per district, only if district has ≥95 building units",citation:"14 Del. C. §1321(14)",url:"",status:"verified",rule:"Counted within total allowed custodial personnel."},
-{component:"Food Services Supervisor",type:"Position",formula:"1 if <500 units & ≥4 schools with lunch programs; else 1 per full 500 units (state); additional up to 1 per 300 units locally funded from cafeteria receipts",citation:"14 Del. C. §1321(e)(8)",url:"",status:"no-status",rule:"No Status entry in source workbook — pending confirmation."},
-{component:"Transportation Supervisor",type:"Position",formula:"1 per 7,500 enrolled pupils; fractional entitlement below threshold",citation:"14 Del. C. §1321(e)(7)",url:"",status:"no-status",rule:"No Status entry in source workbook — pending confirmation."},
-{component:"Reading Cadre",type:"Appropriation",formula:"Calculator currently: flat $96,155 to every LEA incl. charters. Statute: §1305 10-month salary + district's own §1707 Division III equalization unit share, districts only, charters excluded.",citation:"FY2026 Appropriations Act, HB 225 §322(4)",url:"https://legis.delaware.gov/BillDetail/142565",status:"discrepancy",rule:"BR-CO-009 — Calculator totals ($4,134,665 = 43 × $96,155) run roughly 2x the actual appropriation ($2,064,600). Open question to DDOE: correct per-district calc + current §1707 unit values, and whether charters should be excluded (Calculator's D43 logic currently includes them)."},
+{component:"Buildings & Grounds Supervisor",type:"Position",formula:"1 position per district or charter",citation:"Existing §1321(14) citation requires reconciliation",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"confirmed",rule:"Confirmed new rule removes the prior 95-building-unit threshold and makes districts and charter schools eligible."},
+{component:"Food Services Supervisor",type:"Position",formula:"1 per district or charter, plus 1 per 500 Division I positions beyond the first 500",citation:"Existing §1321(e)(8) citation requires reconciliation",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"confirmed",rule:"Confirmed new rule. Prior lunch-program eligibility and cafeteria-funded provisions remain documented for legal/policy reconciliation."},
+{component:"Transportation Supervisor",type:"Position",formula:"1 position per 7,500 students",citation:"14 Del. C. §1321(e)(7)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"no-status",rule:"New formula is documented; district/charter eligibility and below-threshold fractional treatment still require confirmation."},
+{component:"Reading Cadre",type:"Appropriation",formula:"1 position per district or charter",citation:"FY2026 Appropriations Act, HB 225 §322(4)",url:"https://legis.delaware.gov/BillDetail/142565",status:"discrepancy",rule:"Confirmed business rule makes districts and charter schools eligible. This conflicts with the cited FY2026 appropriation's charter exclusion, and the $96,155 flat rate still requires reconciliation to §1305, §1707, and the enacted appropriation."},
 {component:"Administrative Support Professionals",type:"—",formula:"Not defined in workbook",citation:"—",url:"",status:"empty",rule:"Listed as a category header only — no formula, citation, or business rule entered yet."},
 {component:"Instructional Supports",type:"—",formula:"Not defined in workbook",citation:"—",url:"",status:"empty",rule:"Per Sheet1 notes: likely mostly appropriation-funded (Math Coaches, DE Literacy Plan, Early Literacy Coaches, Related Services, Opportunity Funding), not Title 14 unit-generated positions — needs its own rule structure, distinct from the unit-based rows above."},
 {component:"School Custodian Salary",type:"Compensation",formula:"Salary schedule (§1311(a),(c)); prorated 1/12 per unworked month",citation:"14 Del. C. §1311(a),(c)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"no-status",rule:"Covers Custodian, Assistant/Chief Custodian, Skilled Maintenance/Craftsperson classifications. Schedule not in this workbook. Status column blank in source workbook (J26) — previously mislabeled 'verified' here; corrected to 'no-status.'"},
-{component:"Superintendent",type:"Position",formula:"1 per reorganized school district, not charged against personnel allotment",citation:"14 Del. C. §1306(a)(b)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"no-status",rule:"No Status entry in source workbook — pending confirmation."},
+{component:"Superintendent",type:"Position",formula:"1 position per district or charter",citation:"Existing §1306(a)(b) citation requires reconciliation",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"confirmed",rule:"Confirmed new rule: both districts and charter schools are eligible for one Superintendent position."},
 {component:"Superintendent Salary",type:"Compensation",formula:"Base (§1305/§1316) + greater of statutory or indexed admin responsibility amount",citation:"14 Del. C. §1306(a)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"no-status",rule:"Schedule not in this workbook. Status column blank in source workbook (J28) — previously mislabeled 'verified' here; corrected to 'no-status.'"},
-{component:"Assistant Superintendent",type:"Position",formula:"1 per full 300 Division I units, max 2 per district",citation:"14 Del. C. §1321(e)(1)",url:"",status:"no-status",rule:"No Status entry in source workbook. Note: workbook's own 'Implementable Business Rule' text for this row (H29) appears to be copy-pasted from the Director rule — worth flagging to the business owner as a drafting error, separate from the formula itself which is stated correctly in column C/E."},
+{component:"Assistant Superintendent",type:"Position",formula:"1 position per 300 Division I positions, max 2",citation:"14 Del. C. §1321(e)(1)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"confirmed",rule:"Districts only. Charter schools are not eligible. Count one position for each full 300 Division I positions, capped at two."},
 {component:"Specialist — 10-Month Visiting Teacher",type:"Position",formula:"1 per full 250 Division I units; fractional entitlement below threshold",citation:"14 Del. C. §1321(e)(5)",url:"",status:"no-status",rule:"No Status entry in source workbook — pending confirmation."},
 {component:"Specialist — 10-Month Driver Education Teacher",type:"Position",formula:"1 per full 125 tenth-grade students, or 0.2 FTE per full 25 tenth-grade students",citation:"14 Del. C. §1321(e)(6)",url:"",status:"no-status",rule:"No Status entry in source workbook — pending confirmation."},
 ];
 
 function statusBadge(s){
-  const map = {verified:["verified","Verified"], "no-status":["pending","No status entered"], discrepancy:["discrepancy","Open discrepancy"], empty:["empty","Not defined"]};
+  const map = {verified:["verified","Verified"], confirmed:["confirmed","Business rule confirmed"], "no-status":["pending","Pending confirmation"], discrepancy:["discrepancy","Open discrepancy"], empty:["empty","Not defined"]};
   const [cls,label] = map[s] || ["empty",s];
   return `<span class="status ${cls}">${label}</span>`;
 }
 
 function renderBannerCounts(){
-  const counts = {verified:0, "no-status":0, discrepancy:0, empty:0};
+  const counts = {verified:0, confirmed:0, "no-status":0, discrepancy:0, empty:0};
   RULES.forEach(r=>{ counts[r.status] = (counts[r.status]||0) + 1; });
   document.getElementById('bannerTotal').textContent = RULES.length;
   document.getElementById('bannerVerified').textContent = counts.verified;
+  document.getElementById('bannerConfirmed').textContent = counts.confirmed;
   document.getElementById('bannerNoStatus').textContent = counts["no-status"];
   document.getElementById('bannerDiscrepancy').textContent = counts.discrepancy;
   document.getElementById('bannerEmpty').textContent = counts.empty;
@@ -259,13 +335,13 @@ function renderRegister(){
     </tr>
   `).join('');
 
-  const rc = RULES.find(r=>r.status==='discrepancy');
   document.getElementById('reading-cadre-box').innerHTML = `
     <b>BR-CO-009 — Reading Cadre / Literacy Cadre</b><br>
-    Calculator's current logic: flat $96,155 per LEA, tested via "District" OR "Charter" in the LEA name (includes charters).<br>
+    Confirmed business rule: one Reading Cadre position per district or charter.<br>
+    Calculator's current dollar logic: flat $96,155 per LEA.<br>
     Statute (HB 225, FY2026 Operating Budget, §322(4)): funds "each local school district, excluding charter schools" — the §1305 10-month salary schedule value plus the district's own §1707 Division III Equalization Unit share (ranges roughly $1,225–$20,756 per unit per the August 2025 equalization presentation).<br>
-    Reconciliation gap: Calculator output 43 × $96,155 = <b>$4,134,665</b> statewide vs. the HB 225 appropriation of <b>$2,064,600</b> — roughly 2x over.<br>
-    <b>Open questions for DDOE:</b> (1) confirm charter exclusion and fix the LEA-name test; (2) confirm correct per-district §1707-based calculation and supply current unit values; (3) explain how/whether the Calculator's output has been reconciled to the appropriation to date.
+    Reconciliation gap: 43 × $96,155 = <b>$4,134,665</b> statewide vs. the HB 225 appropriation of <b>$2,064,600</b> — roughly 2x over.<br>
+    <b>Open questions for DDOE:</b> (1) reconcile the confirmed district-and-charter rule with the appropriation's charter exclusion; (2) confirm the correct §1707-based calculation and current unit values; (3) explain how the Calculator's output reconciles to the enacted appropriation. The calculator below always counts 1 Reading Cadre position per LEA per the confirmed business rule — it does not apply the charter exclusion from the cited appropriation until DDOE resolves the conflict.
   `;
 
   document.getElementById('ruleSearch').addEventListener('input', e=>{
@@ -286,6 +362,15 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
+// ---------------- PEFC constants ----------------
+const OPP_POOL = 163000000;
+const OPP_STATEWIDE_WEIGHTED = 32909.315;
+const OPP_RATE = OPP_POOL / OPP_STATEWIDE_WEIGHTED; // full precision, used internally
+
+const OP_POOL = 279026800;
+const OP_STATEWIDE_WEIGHTED = 85986.885;
+const OP_RATE = OP_POOL / OP_STATEWIDE_WEIGHTED; // full precision, used internally
+
 // ---------------- Calculator ----------------
 let schoolCount = 0;
 const schools = {};
@@ -303,21 +388,33 @@ function addSchool(name){
       <input class="name" value="${schools[id].name}" data-field="name">
       <button class="remove-btn" data-remove="${id}">Remove</button>
     </div>
-    <div class="grid3">
+    <div class="subhead">Base-Model enrollment (Division I units)</div>
+    <div class="grid4">
       <div>
-        <div class="field-row"><label>K–3 enrollment</label><input type="number" value="0" data-field="k3"></div>
-        <div class="field-row"><label>Grades 4–12 enrollment</label><input type="number" value="0" data-field="g412"></div>
-        <div class="checkbox-row"><input type="checkbox" data-field="isCHS"><label>Comprehensive high school (applies CTE 0.5 deduction, §1703(9)(i))</label></div>
+        <div class="field-row"><label>Pre-K regular enrollment</label><input type="number" min="0" value="0" data-field="prek"></div>
+        <div class="field-row"><label>K–3 regular enrollment</label><input type="number" min="0" value="0" data-field="k3"></div>
       </div>
       <div>
-        <div class="field-row"><label>Basic SpEd count</label><input type="number" value="0" data-field="basic"></div>
-        <div class="field-row"><label>Intensive SpEd count</label><input type="number" value="0" data-field="intensive"></div>
-        <div class="field-row"><label>Complex SpEd count</label><input type="number" value="0" data-field="complex"></div>
+        <div class="field-row"><label>Grades 4–12 regular enrollment</label><input type="number" min="0" value="0" data-field="g412"></div>
+        <div class="checkbox-row"><input type="checkbox" data-field="isCHS"><label>Comprehensive high school (CTE 0.5 deduction, §1703(9)(i))</label></div>
       </div>
       <div>
-        <div class="field-row"><label>CTE pupil-minutes/week (or student count if vo-tech)</label><input type="number" value="0" data-field="cte"></div>
-        <div class="field-row"><label>10th grade enrollment (driver ed)</label><input type="number" value="0" data-field="g10"></div>
+        <div class="field-row"><label>Basic SpEd enrollment</label><input type="number" min="0" value="0" data-field="basic"></div>
+        <div class="field-row"><label>Intensive SpEd enrollment</label><input type="number" min="0" value="0" data-field="intensive"></div>
+        <div class="field-row"><label>Complex SpEd enrollment</label><input type="number" min="0" value="0" data-field="complex"></div>
       </div>
+      <div>
+        <div class="field-row"><label>CTE pupil-minutes/week (or vo-tech student count)</label><input type="number" min="0" value="0" data-field="cte"></div>
+        <div class="field-row"><label>10th grade enrollment (driver ed)</label><input type="number" min="0" value="0" data-field="g10"></div>
+      </div>
+    </div>
+    <div class="subhead">PEFC enrollment (Opportunity &amp; Operational funding)</div>
+    <p class="note">Low-Income, Multilingual Learner, Special Education, and Vocational counts may overlap with Total enrollment and with each other — do not subtract them out. Basic, Intensive, and Complex counts above are reused here automatically.</p>
+    <div class="grid4">
+      <div><div class="field-row"><label>Total enrollment</label><input type="number" min="0" value="0" data-field="totalEnroll"></div></div>
+      <div><div class="field-row"><label>Low-Income (LI) enrollment</label><input type="number" min="0" value="0" data-field="li"></div></div>
+      <div><div class="field-row"><label>Multilingual Learner (MLL) enrollment</label><input type="number" min="0" value="0" data-field="mll"></div></div>
+      <div><div class="field-row"><label>Vocational enrollment (PEFC headcount)</label><input type="number" min="0" value="0" data-field="voc"></div></div>
     </div>
   `;
   wrap.appendChild(div);
@@ -333,36 +430,52 @@ function addSchool(name){
   compute();
 }
 
-function val(el, field){
+// Numeric fields: reject negative / non-finite input, coerce to 0. Never returns NaN or Infinity.
+function num(el, field){
   const f = el.querySelector(`[data-field="${field}"]`);
   if(!f) return 0;
-  return f.type === 'checkbox' ? f.checked : (parseFloat(f.value)||0);
+  if(f.type === 'checkbox') return f.checked;
+  const n = parseFloat(f.value);
+  if(!isFinite(n) || n < 0) return 0;
+  return n;
 }
 
-// Text fields (currently just the school name) must NOT go through val()'s parseFloat —
-// that was silently coercing the name string to NaN -> 0, so every school showed as "0"
-// in the results table. This returns the raw string instead.
+// Text fields (currently just the school name) must NOT go through num()'s parseFloat —
+// that would silently coerce the name string to NaN -> 0. Returns the raw string instead.
 function strVal(el, field){
   const f = el.querySelector(`[data-field="${field}"]`);
   return f ? f.value : '';
 }
 
-function fmt(n){ return (Math.round(n*100)/100).toLocaleString(); }
-function money(n){ return '$' + Math.round(n).toLocaleString(); }
+function safe(n){ return isFinite(n) ? n : 0; }
+function fmt(n){ n = safe(n); return (Math.round(n*100)/100).toLocaleString(); }
+function money(n){ n = safe(n); return '$' + Math.round(n).toLocaleString(); }
+function currency2(n){ n = safe(n); return '$' + n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}); }
 
 function compute(){
   const isVoTech = document.getElementById('isVoTech').checked;
-  let totalUnits = 0, totalCTEUnits = 0, totalEnroll = 0, totalG10 = 0;
+  const leaType = document.getElementById('leaType').value;
+  const isCharter = leaType === 'Charter';
+
+  let totalUnits = 0, totalG10 = 0, leaEnrollment = 0;
+  let leaOppWeighted = 0, leaOppFunding = 0;
+  let leaOpWeighted = 0, leaOpFunding = 0;
+
   const schoolResults = [];
+  const unitRows = [];
+  const oppRows = [];
+  const opRows = [];
 
   Object.keys(schools).forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     const name = strVal(el,'name');
-    const k3 = val(el,'k3'), g412 = val(el,'g412'), basic = val(el,'basic'),
-          intensive = val(el,'intensive'), complex = val(el,'complex'),
-          cte = val(el,'cte'), g10 = val(el,'g10'), isCHS = val(el,'isCHS');
+    const prek = num(el,'prek'), k3 = num(el,'k3'), g412 = num(el,'g412'),
+          basic = num(el,'basic'), intensive = num(el,'intensive'), complex = num(el,'complex'),
+          cte = num(el,'cte'), isCHS = num(el,'isCHS'), g10 = num(el,'g10'),
+          totalEnroll = num(el,'totalEnroll'), li = num(el,'li'), mll = num(el,'mll'), voc = num(el,'voc');
 
+    const prekUnits = prek/8.4;
     const k3Units = k3/16.2;
     const g412UnitsRaw = g412/20;
     const basicUnits = basic/8.4;
@@ -372,7 +485,7 @@ function compute(){
     const cteDeduction = isCHS ? cteUnits*0.5 : 0;
     const g412Units = Math.max(0, g412UnitsRaw - cteDeduction);
 
-    const schoolUnits = k3Units + g412Units + basicUnits + intensiveUnits + complexUnits + cteUnits;
+    const schoolUnits = prekUnits + k3Units + g412Units + basicUnits + intensiveUnits + complexUnits + cteUnits;
 
     // Principal
     const principalFTE = schoolUnits >= 15 ? 1 : 0;
@@ -385,87 +498,116 @@ function compute(){
 
     // Nurse
     const fullNurses = Math.floor(schoolUnits/40);
-    const remainder = schoolUnits - fullNurses*40;
-    const partial = remainder > 0 ? 0.3*(remainder/40) : 0;
-    const nurseFTE = fullNurses + partial;
+    const nurseRemainder = schoolUnits - fullNurses*40;
+    const nursePartial = nurseRemainder > 0 ? 0.3*(nurseRemainder/40) : 0;
+    const nurseFTE = fullNurses + nursePartial;
+
+    // Opportunity funding (per school)
+    const liWeighted = li * 0.675;
+    const mllWeighted = mll * 0.470;
+    const oppWeightedTotal = liWeighted + mllWeighted;
+    const oppFunding = oppWeightedTotal * OPP_RATE;
+
+    // Operational funding (per school)
+    const totWeighted = totalEnroll * 0.200;
+    const liWeightedOp = li * 0.675;
+    const mllWeightedOp = mll * 0.470;
+    const basicWeightedOp = basic * 0.480;
+    const intensiveWeightedOp = intensive * 0.670;
+    const complexWeightedOp = complex * 1.540;
+    const vocWeightedOp = voc * 0.200;
+    const opWeightedTotal = totWeighted + liWeightedOp + mllWeightedOp + basicWeightedOp + intensiveWeightedOp + complexWeightedOp + vocWeightedOp;
+    const opFunding = opWeightedTotal * OP_RATE;
 
     totalUnits += schoolUnits;
-    totalCTEUnits += cteUnits;
-    totalEnroll += (k3+g412+basic+intensive+complex);
     totalG10 += g10;
+    leaEnrollment += totalEnroll;
+    leaOppWeighted += oppWeightedTotal;
+    leaOppFunding += oppFunding;
+    leaOpWeighted += opWeightedTotal;
+    leaOpFunding += opFunding;
 
-    schoolResults.push({name, units:schoolUnits, principalFTE, apFTE, nurseFTE, cteUnits});
+    schoolResults.push({name, units:schoolUnits, principalFTE, apFTE, nurseFTE});
+    unitRows.push({name, prekUnits, k3Units, g412Units, basicUnits, intensiveUnits, complexUnits, cteUnits, total:schoolUnits});
+    oppRows.push({name, li, liWeighted, mll, mllWeighted, total:oppWeightedTotal, funding:oppFunding});
+    opRows.push({name, totWeighted, li, liWeightedOp, mll, mllWeightedOp, basic, basicWeightedOp, intensive, intensiveWeightedOp, complex, complexWeightedOp, voc, vocWeightedOp, total:opWeightedTotal, funding:opFunding});
   });
 
-  // school results table
+  const hasSchools = Object.keys(schools).length > 0;
+
+  // ---- Section 1: Division I units ----
+  document.getElementById('unitsBody').innerHTML = unitRows.map(r=>`
+    <tr><td>${r.name}</td><td class="num">${fmt(r.prekUnits)}</td><td class="num">${fmt(r.k3Units)}</td>
+    <td class="num">${fmt(r.g412Units)}</td><td class="num">${fmt(r.basicUnits)}</td><td class="num">${fmt(r.intensiveUnits)}</td>
+    <td class="num">${fmt(r.complexUnits)}</td><td class="num">${fmt(r.cteUnits)}</td><td class="num"><b>${fmt(r.total)}</b></td></tr>
+  `).join('') + (unitRows.length ? `<tr class="total"><td colspan="8">Total LEA Division I units</td><td class="num">${fmt(totalUnits)}</td></tr>` : '<tr><td colspan="9" style="color:#999">No schools added yet.</td></tr>');
+
+  // ---- Section 2: school-level positions ----
   document.getElementById('schoolResultsBody').innerHTML = schoolResults.map(s=>`
     <tr><td>${s.name}</td><td class="num">${fmt(s.units)}</td><td class="num">${fmt(s.principalFTE)}</td>
-    <td class="num">${fmt(s.apFTE)}</td><td class="num">${fmt(s.nurseFTE)}</td><td class="num">${fmt(s.cteUnits)}</td></tr>
-  `).join('') || '<tr><td colspan="6" style="color:#999">No schools added yet.</td></tr>';
+    <td class="num">${fmt(s.apFTE)}</td><td class="num">${fmt(s.nurseFTE)}</td></tr>
+  `).join('') || '<tr><td colspan="5" style="color:#999">No schools added yet.</td></tr>';
 
-  // district level
-  const lunchSchools = parseFloat(document.getElementById('lunchSchools').value)||0;
-  const bgUnits = parseFloat(document.getElementById('bgUnits').value)||0;
-  const distEnroll = parseFloat(document.getElementById('distEnroll').value)||totalEnroll;
-  const includeRC = document.getElementById('includeReadingCadre').checked;
-
-  // Director (§1321(e)(2)) and Assistant Superintendent (§1321(e)(1)): statute text has no
-  // fractional-support clause, so these stay floored — 0 below their first threshold.
+  // ---- Section 3: LEA-level positions ----
+  const superintendent = hasSchools ? 1 : 0;
+  const adminAssistant = hasSchools ? 1 : 0;
+  const asstSuper = isCharter ? 0 : Math.min(2, Math.floor(totalUnits/300));
   const director = totalUnits >= 200 ? Math.min(6, 1 + Math.floor((totalUnits-200)/100)) : 0;
-  const asstSuper = Math.min(2, Math.floor(totalUnits/300));
-
-  // 11-Month Supervisor (§1321(e)(4)), Visiting Teacher (§1321(e)(5)), and Transportation
-  // Supervisor (§1321(e)(7)): the statute grants fractional credit only to districts that don't
-  // qualify for even one full position ("support for the fractional part of the FIRST
-  // supervisor" — singular, one-time allowance). Above the first threshold it's strictly whole
-  // positions per full threshold, with no continuing fractional credit for the remainder. So
-  // this must be piecewise, not a continuous ratio: fractional below the first threshold, floored
-  // at and above it.
   const supervisor11mo = totalUnits < 150 ? totalUnits/150 : Math.floor(totalUnits/150);
-  const visitingTeacher = totalUnits < 250 ? totalUnits/250 : Math.floor(totalUnits/250);
-  const transportSup = distEnroll < 7500 ? distEnroll/7500 : Math.floor(distEnroll/7500);
-
-  const bgSupervisor = bgUnits >= 95 ? 1 : 0;
-  let foodServiceSup;
-  if(totalUnits < 500){
-    foodServiceSup = lunchSchools >= 4 ? 1 : 0;
-  } else {
-    foodServiceSup = Math.floor(totalUnits/500);
-  }
+  const bgSupervisor = hasSchools ? 1 : 0;
+  const foodServiceSup = hasSchools ? 1 + Math.floor(Math.max(0, totalUnits - 500)/500) : 0;
+  const transportSup = leaEnrollment < 7500 ? leaEnrollment/7500 : Math.floor(leaEnrollment/7500);
+  const readingCadre = hasSchools ? 1 : 0;
   const driverEd = Math.floor(totalG10/25)*0.2;
-  const superintendent = Object.keys(schools).length > 0 ? 1 : 0;
-  const readingCadre = includeRC ? 1 : 0;
 
   const districtRows = [
-    {label:"Superintendent", cite:"§1306(a)(b)", status:"no-status", val:superintendent},
-    {label:"Director", cite:"§1321(e)(2)", status:"no-status", val:director},
-    {label:"Assistant Superintendent", cite:"§1321(e)(1)", status:"no-status", val:asstSuper},
-    {label:"11-Month Supervisor", cite:"§1321(e)(4)", status:"no-status", val:supervisor11mo},
-    {label:"Buildings & Grounds Supervisor", cite:"§1321(14)", status:"verified", val:bgSupervisor},
-    {label:"Food Services Supervisor (state-funded portion)", cite:"§1321(e)(8)", status:"no-status", val:foodServiceSup},
-    {label:"Transportation Supervisor", cite:"§1321(e)(7)", status:"no-status", val:transportSup},
-    {label:"Specialist — 10-Month Visiting Teacher", cite:"§1321(e)(5)", status:"no-status", val:visitingTeacher},
-    {label:"Specialist — 10-Month Driver Ed Teacher", cite:"§1321(e)(6)", status:"no-status", val:driverEd},
-    {label:"Reading Cadre (Literacy Specialist) — DISCREPANCY, see Register tab", cite:"HB 225 §322(4)", status:"discrepancy", val:readingCadre},
+    {label:"Superintendent", formula:"1 per District or Charter", cite:"§1306(a)(b)", status:"confirmed", val:superintendent},
+    {label:"Administrative Assistant", formula:"1 per District or Charter", cite:"pending citation", status:"confirmed", val:adminAssistant},
+    {label:"Assistant Superintendent", formula: isCharter ? "Charter LEA: 0 (confirmed rule)" : "min(2, floor(units / 300))", cite:"§1321(e)(1)", status:"confirmed", val:asstSuper},
+    {label:"Director", formula:"units≥200 ? min(6, 1+floor((units−200)/100)) : 0", cite:"§1321(e)(2)", status:"no-status", val:director},
+    {label:"11-Month Supervisor", formula:"units<150 ? units/150 : floor(units/150)", cite:"§1321(e)(4)", status:"no-status", val:supervisor11mo},
+    {label:"Buildings & Grounds Supervisor", formula:"1 per District or Charter (95-unit threshold removed)", cite:"§1321(14)", status:"confirmed", val:bgSupervisor},
+    {label:"Food Services Supervisor", formula:"1 base + 1 per each complete 500 units beyond the first 500", cite:"§1321(e)(8)", status:"confirmed", val:foodServiceSup},
+    {label:"Transportation Supervisor", formula:"enrollment<7500 ? enrollment/7500 : floor(enrollment/7500)", cite:"§1321(e)(7)", status:"no-status", val:transportSup},
+    {label:"Reading Cadre — see Register tab for discrepancy", formula:"1 per District or Charter (confirmed rule)", cite:"HB 225 §322(4)", status:"discrepancy", val:readingCadre},
+    {label:"Specialist — 10-Month Driver Ed Teacher", formula:"floor(g10/25) × 0.2", cite:"§1321(e)(6)", status:"no-status", val:driverEd},
   ];
 
   document.getElementById('districtResultsBody').innerHTML = districtRows.map(r=>`
-    <tr><td>${r.label}</td><td class="cite">${r.cite}</td><td>${statusBadge(r.status)}</td><td class="num">${fmt(r.val)}</td></tr>
-  `).join('') + `<tr class="total"><td colspan="3">Total district Division I units (all schools)</td><td class="num">${fmt(totalUnits)}</td></tr>`;
+    <tr><td>${r.label}</td><td style="font-size:.78rem;color:var(--sub)">${r.formula}</td><td class="cite">${r.cite}</td><td>${statusBadge(r.status)}</td><td class="num">${fmt(r.val)}</td></tr>
+  `).join('');
 
-  // cost table
+  // ---- Section 4: Opportunity funding ----
+  document.getElementById('oppRateLabel').textContent = currency2(OPP_RATE);
+  document.getElementById('oppBody').innerHTML = oppRows.map(r=>`
+    <tr><td>${r.name}</td><td class="num">${fmt(r.li)}</td><td class="num">${fmt(r.liWeighted)}</td>
+    <td class="num">${fmt(r.mll)}</td><td class="num">${fmt(r.mllWeighted)}</td>
+    <td class="num">${fmt(r.total)}</td><td class="num">${currency2(r.funding)}</td></tr>
+  `).join('') + (oppRows.length ? `<tr class="total"><td colspan="5">LEA total weighted enrollment / funding</td><td class="num">${fmt(leaOppWeighted)}</td><td class="num">${currency2(leaOppFunding)}</td></tr>` : '<tr><td colspan="7" style="color:#999">No schools added yet.</td></tr>');
+
+  // ---- Section 5: Operational funding ----
+  document.getElementById('opRateLabel').textContent = currency2(OP_RATE);
+  document.getElementById('opBody').innerHTML = opRows.map(r=>`
+    <tr><td>${r.name}</td><td class="num">${fmt(r.totWeighted)}</td><td class="num">${fmt(r.liWeightedOp)}</td>
+    <td class="num">${fmt(r.mllWeightedOp)}</td><td class="num">${fmt(r.basicWeightedOp)}</td>
+    <td class="num">${fmt(r.intensiveWeightedOp)}</td><td class="num">${fmt(r.complexWeightedOp)}</td>
+    <td class="num">${fmt(r.vocWeightedOp)}</td><td class="num">${fmt(r.total)}</td><td class="num">${currency2(r.funding)}</td></tr>
+  `).join('') + (opRows.length ? `<tr class="total"><td colspan="8">LEA total weighted enrollment / funding</td><td class="num">${fmt(leaOpWeighted)}</td><td class="num">${currency2(leaOpFunding)}</td></tr>` : '<tr><td colspan="10" style="color:#999">No schools added yet.</td></tr>');
+
+  // ---- Section 6: cost roll-up ----
   const costPositions = [
     {label:"Principal (sum of schools)", fte: schoolResults.reduce((a,s)=>a+s.principalFTE,0)},
     {label:"Assistant Principal (sum of schools)", fte: schoolResults.reduce((a,s)=>a+s.apFTE,0)},
     {label:"School Nurse (sum of schools)", fte: schoolResults.reduce((a,s)=>a+s.nurseFTE,0)},
     {label:"Superintendent", fte: superintendent},
-    {label:"Director", fte: director},
+    {label:"Administrative Assistant", fte: adminAssistant},
     {label:"Assistant Superintendent", fte: asstSuper},
+    {label:"Director", fte: director},
     {label:"11-Month Supervisor", fte: supervisor11mo},
     {label:"Buildings & Grounds Supervisor", fte: bgSupervisor},
     {label:"Food Services Supervisor", fte: foodServiceSup},
     {label:"Transportation Supervisor", fte: transportSup},
-    {label:"Visiting Teacher", fte: visitingTeacher},
+    {label:"Reading Cadre", fte: readingCadre},
     {label:"Driver Ed Teacher", fte: driverEd},
   ];
 
@@ -479,7 +621,7 @@ function compute(){
 
   costBody.innerHTML = costPositions.map(p=>`
     <tr><td>${p.label}</td><td class="num">${fmt(p.fte)}</td>
-    <td class="num"><input class="rate-input" type="number" placeholder="TBD" value="${existingRates[p.label]||''}" data-cost-row="${p.label}"></td>
+    <td class="num"><input class="rate-input" type="number" min="0" placeholder="TBD" value="${existingRates[p.label]||''}" data-cost-row="${p.label}"></td>
     <td class="num cost-cell" data-cost-label="${p.label}">—</td></tr>
   `).join('');
 
@@ -490,7 +632,7 @@ function compute(){
       const p = costPositions.find(x=>x.label===label);
       const rate = parseFloat(tr.querySelector('.rate-input').value);
       const cell = tr.querySelector('.cost-cell');
-      if(!isNaN(rate) && p){
+      if(isFinite(rate) && rate >= 0 && p){
         const cost = rate * p.fte;
         cell.textContent = money(cost);
         total += cost;
@@ -505,7 +647,7 @@ function compute(){
 }
 
 document.getElementById('addSchoolBtn').addEventListener('click', ()=>addSchool());
-['isVoTech','lunchSchools','bgUnits','distEnroll','includeReadingCadre'].forEach(id=>{
+['isVoTech','leaType','leaName'].forEach(id=>{
   document.getElementById(id).addEventListener('input', compute);
   document.getElementById(id).addEventListener('change', compute);
 });
