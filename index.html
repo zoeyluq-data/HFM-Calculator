@@ -81,7 +81,7 @@
 <div class="wrap">
 
   <div class="banner">
-    <b>Read before using this for real numbers:</b> of the 20 business rules in the source workbook, 13 are marked "verified," 7 have no status entered, and two funding categories (Instructional Supports, Administrative Support Professionals) have no formula defined at all yet — the workbook only lists them as headers. One rule (Reading Cadre) has a known, unresolved conflict between the Calculator's current logic and the FY2026 appropriations act (HB 225 §322(4)), worth roughly a 2x overstatement statewide. This tool calculates every formula that <i>is</i> defined, labels every line with its verification status and legal citation, and refuses to guess at the rules that aren't defined yet. See the <b>Business Rule Register</b> tab for the full list and open questions.
+    <b>Read before using this for real numbers:</b> of the <span id="bannerTotal">?</span> business rules in the source workbook, <span id="bannerVerified">?</span> are marked "verified," <span id="bannerNoStatus">?</span> have no status entered, and <span id="bannerEmpty">?</span> funding categories (Instructional Supports, Administrative Support Professionals) have no formula defined at all yet — the workbook only lists them as headers. <span id="bannerDiscrepancy">?</span> rule(s) (Reading Cadre) have a known, unresolved conflict between the Calculator's current logic and the FY2026 appropriations act (HB 225 §322(4)), worth roughly a 2x overstatement statewide. This tool calculates every formula that <i>is</i> defined, labels every line with its verification status and legal citation, and refuses to guess at the rules that aren't defined yet. These counts are computed live from the rule list below, not typed in by hand, so they can't drift out of sync again. See the <b>Business Rule Register</b> tab for the full list and open questions.
   </div>
 
   <nav>
@@ -221,9 +221,9 @@ const RULES = [
 {component:"Reading Cadre",type:"Appropriation",formula:"Calculator currently: flat $96,155 to every LEA incl. charters. Statute: §1305 10-month salary + district's own §1707 Division III equalization unit share, districts only, charters excluded.",citation:"FY2026 Appropriations Act, HB 225 §322(4)",url:"https://legis.delaware.gov/BillDetail/142565",status:"discrepancy",rule:"BR-CO-009 — Calculator totals ($4,134,665 = 43 × $96,155) run roughly 2x the actual appropriation ($2,064,600). Open question to DDOE: correct per-district calc + current §1707 unit values, and whether charters should be excluded (Calculator's D43 logic currently includes them)."},
 {component:"Administrative Support Professionals",type:"—",formula:"Not defined in workbook",citation:"—",url:"",status:"empty",rule:"Listed as a category header only — no formula, citation, or business rule entered yet."},
 {component:"Instructional Supports",type:"—",formula:"Not defined in workbook",citation:"—",url:"",status:"empty",rule:"Per Sheet1 notes: likely mostly appropriation-funded (Math Coaches, DE Literacy Plan, Early Literacy Coaches, Related Services, Opportunity Funding), not Title 14 unit-generated positions — needs its own rule structure, distinct from the unit-based rows above."},
-{component:"School Custodian Salary",type:"Compensation",formula:"Salary schedule (§1311(a),(c)); prorated 1/12 per unworked month",citation:"14 Del. C. §1311(a),(c)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"verified",rule:"Covers Custodian, Assistant/Chief Custodian, Skilled Maintenance/Craftsperson classifications. Schedule not in this workbook."},
+{component:"School Custodian Salary",type:"Compensation",formula:"Salary schedule (§1311(a),(c)); prorated 1/12 per unworked month",citation:"14 Del. C. §1311(a),(c)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"no-status",rule:"Covers Custodian, Assistant/Chief Custodian, Skilled Maintenance/Craftsperson classifications. Schedule not in this workbook. Status column blank in source workbook (J26) — previously mislabeled 'verified' here; corrected to 'no-status.'"},
 {component:"Superintendent",type:"Position",formula:"1 per reorganized school district, not charged against personnel allotment",citation:"14 Del. C. §1306(a)(b)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"no-status",rule:"No Status entry in source workbook — pending confirmation."},
-{component:"Superintendent Salary",type:"Compensation",formula:"Base (§1305/§1316) + greater of statutory or indexed admin responsibility amount",citation:"14 Del. C. §1306(a)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"verified",rule:"Schedule not in this workbook."},
+{component:"Superintendent Salary",type:"Compensation",formula:"Base (§1305/§1316) + greater of statutory or indexed admin responsibility amount",citation:"14 Del. C. §1306(a)",url:"https://delcode.delaware.gov/title14/c013/index.html",status:"no-status",rule:"Schedule not in this workbook. Status column blank in source workbook (J28) — previously mislabeled 'verified' here; corrected to 'no-status.'"},
 {component:"Assistant Superintendent",type:"Position",formula:"1 per full 300 Division I units, max 2 per district",citation:"14 Del. C. §1321(e)(1)",url:"",status:"no-status",rule:"No Status entry in source workbook. Note: workbook's own 'Implementable Business Rule' text for this row (H29) appears to be copy-pasted from the Director rule — worth flagging to the business owner as a drafting error, separate from the formula itself which is stated correctly in column C/E."},
 {component:"Specialist — 10-Month Visiting Teacher",type:"Position",formula:"1 per full 250 Division I units; fractional entitlement below threshold",citation:"14 Del. C. §1321(e)(5)",url:"",status:"no-status",rule:"No Status entry in source workbook — pending confirmation."},
 {component:"Specialist — 10-Month Driver Education Teacher",type:"Position",formula:"1 per full 125 tenth-grade students, or 0.2 FTE per full 25 tenth-grade students",citation:"14 Del. C. §1321(e)(6)",url:"",status:"no-status",rule:"No Status entry in source workbook — pending confirmation."},
@@ -235,7 +235,18 @@ function statusBadge(s){
   return `<span class="status ${cls}">${label}</span>`;
 }
 
+function renderBannerCounts(){
+  const counts = {verified:0, "no-status":0, discrepancy:0, empty:0};
+  RULES.forEach(r=>{ counts[r.status] = (counts[r.status]||0) + 1; });
+  document.getElementById('bannerTotal').textContent = RULES.length;
+  document.getElementById('bannerVerified').textContent = counts.verified;
+  document.getElementById('bannerNoStatus').textContent = counts["no-status"];
+  document.getElementById('bannerDiscrepancy').textContent = counts.discrepancy;
+  document.getElementById('bannerEmpty').textContent = counts.empty;
+}
+
 function renderRegister(){
+  renderBannerCounts();
   const body = document.getElementById('ruleBody');
   body.innerHTML = RULES.map(r=>`
     <tr>
@@ -328,6 +339,14 @@ function val(el, field){
   return f.type === 'checkbox' ? f.checked : (parseFloat(f.value)||0);
 }
 
+// Text fields (currently just the school name) must NOT go through val()'s parseFloat —
+// that was silently coercing the name string to NaN -> 0, so every school showed as "0"
+// in the results table. This returns the raw string instead.
+function strVal(el, field){
+  const f = el.querySelector(`[data-field="${field}"]`);
+  return f ? f.value : '';
+}
+
 function fmt(n){ return (Math.round(n*100)/100).toLocaleString(); }
 function money(n){ return '$' + Math.round(n).toLocaleString(); }
 
@@ -339,7 +358,7 @@ function compute(){
   Object.keys(schools).forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
-    const name = val(el,'name');
+    const name = strVal(el,'name');
     const k3 = val(el,'k3'), g412 = val(el,'g412'), basic = val(el,'basic'),
           intensive = val(el,'intensive'), complex = val(el,'complex'),
           cte = val(el,'cte'), g10 = val(el,'g10'), isCHS = val(el,'isCHS');
@@ -390,8 +409,20 @@ function compute(){
   const distEnroll = parseFloat(document.getElementById('distEnroll').value)||totalEnroll;
   const includeRC = document.getElementById('includeReadingCadre').checked;
 
+  // Director (§1321(e)(2)) and Assistant Superintendent (§1321(e)(1)): statute text has no
+  // fractional-support clause, so these stay floored — 0 below their first threshold.
   const director = totalUnits >= 200 ? Math.min(6, 1 + Math.floor((totalUnits-200)/100)) : 0;
-  const supervisor11mo = Math.floor(totalUnits/150);
+  const asstSuper = Math.min(2, Math.floor(totalUnits/300));
+
+  // 11-Month Supervisor (§1321(e)(4)), Visiting Teacher (§1321(e)(5)), and Transportation
+  // Supervisor (§1321(e)(7)) all explicitly instruct DDOE to provide fractional support below
+  // threshold ("districts that do not qualify... shall be provided [the] fractional part").
+  // Modeled as a continuous ratio (units/threshold) rather than floor-to-zero, since floor(u/t)
+  // + the fractional remainder(u/t) collapses to the same value as u/t directly.
+  const supervisor11mo = totalUnits/150;
+  const visitingTeacher = totalUnits/250;
+  const transportSup = distEnroll/7500;
+
   const bgSupervisor = bgUnits >= 95 ? 1 : 0;
   let foodServiceSup;
   if(totalUnits < 500){
@@ -399,9 +430,6 @@ function compute(){
   } else {
     foodServiceSup = Math.floor(totalUnits/500);
   }
-  const transportSup = Math.floor(distEnroll/7500);
-  const asstSuper = Math.min(2, Math.floor(totalUnits/300));
-  const visitingTeacher = Math.floor(totalUnits/250);
   const driverEd = Math.floor(totalG10/25)*0.2;
   const superintendent = Object.keys(schools).length > 0 ? 1 : 0;
   const readingCadre = includeRC ? 1 : 0;
