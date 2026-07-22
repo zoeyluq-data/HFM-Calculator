@@ -152,7 +152,7 @@
 
     <div class="card">
       <h2 style="margin-top:0">1. Select LEA and School</h2>
-      <p class="note">Every Delaware district and charter is loaded from the reference workbook's real FY25-26 data — 259 schools across 44 LEAs, plus a Statewide total. Nothing here is typed by hand; pick an LEA, then optionally a specific school within it.</p>
+      <p class="note">Every Delaware district and charter is loaded from the reference workbook's real FY25-26 data — 259 schools across 43 independent LEAs (19 districts + 24 charters), plus a Statewide total. Dover Air Force Base's enrollment is folded into the Statewide totals but isn't separately selectable here. Nothing here is typed by hand; pick an LEA, then optionally a specific school within it.</p>
       <div class="two-col">
         <div>
           <div class="field-row"><label>LEA</label><select id="calcLea"></select></div>
@@ -337,9 +337,10 @@
     </div>
 
     <div class="card">
-      <h2 style="margin-top:0">3. Opportunity Funding <span class="confidence-tag verified">Verified</span></h2>
+      <h2 style="margin-top:0">3. Opportunity Funding <span class="confidence-tag verified">Verified formula</span></h2>
+      <p class="note">The $163,000,000 pool is the FY25-26 appropriation — edit it to model a future year's funding level.</p>
+      <div class="field-row" style="max-width:420px"><label>Opportunity statewide pool</label><input type="number" class="rate-input" id="wiOppPool" value="163000000" style="width:140px"></div>
       <div class="rate-box">
-        <div class="stat">Statewide pool<b id="wiOppPoolLabel">—</b></div>
         <div class="stat">Statewide weighted enrollment<b>32,909.315</b></div>
         <div class="stat">Base rate<b id="wiOppRateLabel">—</b></div>
       </div>
@@ -350,9 +351,10 @@
     </div>
 
     <div class="card">
-      <h2 style="margin-top:0">4. Operational Funding <span class="confidence-tag verified">Verified</span></h2>
+      <h2 style="margin-top:0">4. Operational Funding <span class="confidence-tag verified">Verified formula</span></h2>
+      <p class="note">The $279,026,800 pool is the FY25-26 appropriation — edit it to model a future year's funding level.</p>
+      <div class="field-row" style="max-width:420px"><label>Operational statewide pool</label><input type="number" class="rate-input" id="wiOpPool" value="279026800" style="width:140px"></div>
       <div class="rate-box">
-        <div class="stat">Statewide pool<b id="wiOpPoolLabel">—</b></div>
         <div class="stat">Statewide weighted enrollment<b>85,986.885</b></div>
         <div class="stat">Base rate<b id="wiOpRateLabel">—</b></div>
       </div>
@@ -392,7 +394,7 @@
         <li><b>Resolve Reading Cadre.</b> Reading Cadre is not a column in the reference workbook's Data sheet — it's computed at the top level as a flat 1-per-LEA at $96,155, the same as before. The conflict with the FY2026 appropriation (which excludes charters and prices the position differently) is still open. See the Register tab.</li>
         <li><b>The three items the reference workbook itself flags as open: Equalization, Local Funding Reform, and Tiering LI/MLL/Vocational weights.</b> These are noted directly in the source file (Calculator!S2:S5) as unresolved policy questions, not something this tool can answer — they need DDOE/legislative input.</li>
         <li><b>Verify the Central Office formulas against actual statute, not just against this workbook.</b> The reference workbook is the best available source of the current calculation logic, but "what the spreadsheet currently computes" and "what's legally correct" aren't guaranteed to be the same thing — that's the entire premise of this project. Assistant Superintendent's per-school-then-summed methodology, in particular, is worth an explicit legal check.</li>
-        <li><b>Decide whether the Statewide Superintendent count (43) should be updated.</b> The reference workbook hardcodes 43 as the Statewide Superintendent count, but the actual number of LEAs in this dataset is 44. This calculator uses a dynamic count (currently 44) rather than silently copying the hardcoded 43 — flagging the discrepancy rather than picking one silently.</li>
+        <li><b>Resolved: the Statewide Superintendent count is 43, not 44.</b> This was flagged as an open discrepancy in an earlier version of this calculator; it turned out to be a bug in this tool, not a real conflict. Delaware has 19 traditional school districts and 24 charter schools (43 independent LEAs). Dover Air Force Base appears as a 44th row in the reference workbook's Data sheet for enrollment/funding attribution, but it isn't an independent LEA — its own Assistant Superintendent and Director fields are 0, and it doesn't get its own Central Office. An earlier version of this calculator's LEA-count logic classified anything not ending in "District" as a charter, which silently swept DAFB into the charter bucket and inflated the total to 44. Fixed 2026-07-22.</li>
         <li><b>Confirm the CTE/Vocational Division I chain independently.</b> Vocational Division I and Vocational Deduct come pre-computed from the reference workbook's Data sheet (itself derived from a per-school CTE participation percentage table). This calculator uses those numbers as given rather than re-deriving them, since re-deriving them independently risks introducing a new error rather than removing one.</li>
         <li><b>Get real formulas for Principal, Assistant Principal, and Admin Support Professionals.</b> The What-If Model tab currently uses step-functions pattern-matched against the 259 real school rows, not a published rule — I could not find or derive an exact formula for these from the reference workbook (they're precomputed values there too). If DDOE or the reference workbook's author can share the actual formula, the What-If tool should be updated to use it and its "Pattern-derived" tags removed.</li>
         <li><b>Food Services Supervisor doesn't appear to be enrollment-driven at all.</b> Only 8 of 259 real schools have a nonzero value, and it's always exactly 1, not scaled to size — it looks like a fixed designation (a specific kitchen/site), not a formula. The What-If tool treats it as a manual yes/no toggle rather than guessing at a threshold.</li>
@@ -418,7 +420,7 @@ const RULES = [
 {component:"Assistant Principal", type:"Position", formula:"Stepped formula based on units + Instructional Supports + Admin Support Professionals, rounded down to a whole position (fractional 0.65 credit is NOT preserved in the reference workbook)", rate:"$134,266", status:"verified", rule:"Reference workbook's ROUNDDOWN() strips the statute's fractional (0.65) partial-position credit — pulled as-is from Data!P."},
 {component:"Administrative Support Professionals", type:"Position", formula:"Tiered: 1 per 10 combined positions for the first 100, then 1 per 12 thereafter", rate:"$74,017", status:"verified", rule:"Pulled directly from Data!R."},
 {component:"Instructional Supports", type:"Position", formula:"20% of Division I positions earned — replaces individually-modeled Nursing, Driver's Ed, Mental Health, Related Services, Academic Excellence, etc.", rate:"$96,155", status:"verified", rule:"Pulled directly from Data!Q. This is a structural simplification relative to the older Title 14 statute-by-statute model this calculator used before 2026-07-22."},
-{component:"Superintendent", type:"Position", formula:"1 per District or Charter LEA; 0 for an individual school; equal to the total LEA count when Statewide is selected", rate:"$188,319", status:"confirmed", rule:"Reference hardcodes 43 for Statewide; this calculator uses a dynamic count (44) from the loaded dataset instead — see Plan Forward tab."},
+{component:"Superintendent", type:"Position", formula:"1 per independent LEA (19 districts + 24 charters = 43); 0 for an individual school; 0 for Dover Air Force Base (not an independent LEA); 43 when Statewide is selected", rate:"$188,319", status:"verified", rule:"Matches the reference workbook's hardcoded Statewide count of 43 exactly. An earlier version of this calculator computed a dynamic count of 44 by misclassifying Dover Air Force Base as a charter — fixed 2026-07-22."},
 {component:"Administrative Assistant", type:"Position", formula:"1 per District or Charter LEA, same pattern as Superintendent", rate:"$111,365", status:"confirmed", rule:"Legal citation still pending — matches reference workbook logic."},
 {component:"Assistant Superintendent", type:"Position", formula:"Per school: 0 below 300 combined units (Division I + Principal + AP + Instructional Supports + Admin Support Professionals); above 300, 1 + (units−300)/300, capped at 2. Summed across schools to the LEA.", rate:"$167,858", status:"confirmed", rule:"Applies identically to District and Charter LEAs in the reference workbook — a prior version of this calculator incorrectly zeroed this out for charters."},
 {component:"Director", type:"Position", formula:"Per school: 0 below 200 combined units (same base as Assistant Superintendent); above 200, 1 + 1 per additional 100, capped at 6. Summed across schools to the LEA.", rate:"$166,369", status:"confirmed", rule:"Pulled directly from Data!T."},
@@ -437,7 +439,7 @@ function statusBadge(s){
 
 function renderTopBanner(){
   document.getElementById('topBanner').innerHTML = `
-    <b>Rebuilt 2026-07-22 from the uploaded reference workbook</b> ("Hybrid Funding Formula Calculator for 25-26 w Charter version 05152026.xlsm"). This replaces a prior version of this tool that used manual enrollment entry and several formulas that turned out to be wrong once the real reference file was available — see the discrepancy box on the Register tab for exactly what changed and why. All enrollment and position data below is real FY25-26 data for all 44 Delaware LEAs and 259 schools, loaded directly from that workbook — nothing is typed in by hand except position/salary rates (pre-filled with real FY25-26 numbers, editable) and the optional Additional State Funding amount. This is not an official DDOE calculator.
+    <b>Rebuilt 2026-07-22 from the uploaded reference workbook</b> ("Hybrid Funding Formula Calculator for 25-26 w Charter version 05152026.xlsm"). This replaces a prior version of this tool that used manual enrollment entry and several formulas that turned out to be wrong once the real reference file was available — see the discrepancy box on the Register tab for exactly what changed and why. All enrollment and position data below is real FY25-26 data for 43 independent Delaware LEAs (19 districts + 24 charters) and 259 schools, loaded directly from that workbook — nothing is typed in by hand except position/salary rates (pre-filled with real FY25-26 numbers, editable) and the optional Additional State Funding amount. This is not an official DDOE calculator.
   `;
 }
 
@@ -481,17 +483,29 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 });
 
 // ---------------- Calculator ----------------
+// LEA classification: 19 traditional districts (name ends in "School District" / "School District" variants)
+// + 24 charter schools + Dover Air Force Base, which is neither — a separate federal-impact-aid entity that is
+// NOT one of the 43 independent LEAs with its own Central Office (its own asstSupt/director fields are 0 in the
+// reference data). An earlier version of this calculator lumped DAFB into "Charters" by default (anything not
+// matching /District$/), which silently inflated the Statewide LEA count to 44 instead of the correct 43
+// (19 districts + 24 charters). Fixed 2026-07-22.
+const DAFB_CODE = 'DAFB';
 const DISTRICT_CODE_SET = new Set(Object.keys(REFERENCE_DATA.leas).filter(c => /District$/.test(REFERENCE_DATA.leas[c].aggregate.school)));
+const CHARTER_CODE_SET = new Set(Object.keys(REFERENCE_DATA.leas).filter(c => c !== DAFB_CODE && !DISTRICT_CODE_SET.has(c)));
+const REAL_LEA_COUNT = DISTRICT_CODE_SET.size + CHARTER_CODE_SET.size; // 43
 function leaDisplayName(code){ return REFERENCE_DATA.leas[code].aggregate.school; }
 
 function populateLeaSelect(){
   const sel = document.getElementById('calcLea');
   const codes = Object.keys(REFERENCE_DATA.leas).sort((a,b)=>leaDisplayName(a).localeCompare(leaDisplayName(b)));
   const districts = codes.filter(c=>DISTRICT_CODE_SET.has(c));
-  const charters = codes.filter(c=>!DISTRICT_CODE_SET.has(c));
+  const charters = codes.filter(c=>CHARTER_CODE_SET.has(c));
+  // Dover Air Force Base intentionally excluded from the dropdown — not an independent LEA, and not
+  // in scope for this calculator right now. Its enrollment stays inside the Statewide totals below
+  // (the reference workbook includes it there), it just isn't separately selectable.
   let html = '<option value="__statewide__">Statewide</option>';
-  html += '<optgroup label="Districts">' + districts.map(c=>`<option value="${c}">${leaDisplayName(c)}</option>`).join('') + '</optgroup>';
-  html += '<optgroup label="Charters">' + charters.map(c=>`<option value="${c}">${leaDisplayName(c)}</option>`).join('') + '</optgroup>';
+  html += '<optgroup label="Districts (19)">' + districts.map(c=>`<option value="${c}">${leaDisplayName(c)}</option>`).join('') + '</optgroup>';
+  html += '<optgroup label="Charters (24)">' + charters.map(c=>`<option value="${c}">${leaDisplayName(c)}</option>`).join('') + '</optgroup>';
   sel.innerHTML = html;
   populateSchoolSelect();
 }
@@ -515,12 +529,12 @@ function populateSchoolSelect(){
 
 function getSelectedRow(){
   const leaCode = document.getElementById('calcLea').value;
-  if(leaCode === '__statewide__') return {row: REFERENCE_DATA.statewide, mode:'statewide'};
+  if(leaCode === '__statewide__') return {row: REFERENCE_DATA.statewide, mode:'statewide', leaCode};
   const group = REFERENCE_DATA.leas[leaCode];
   const schoolVal = document.getElementById('calcSchool').value;
-  if(schoolVal === '__agg__' || !schoolVal) return {row: group.aggregate, mode:'lea'};
+  if(schoolVal === '__agg__' || !schoolVal) return {row: group.aggregate, mode:'lea', leaCode};
   const row = group.schools.find(s=>s.school===schoolVal) || group.aggregate;
-  return {row, mode:'school'};
+  return {row, mode:'school', leaCode};
 }
 
 function safe(n){ return isFinite(n) ? n : 0; }
@@ -530,7 +544,7 @@ function currency0(n){ n=safe(n); return '$' + Math.round(n).toLocaleString(); }
 function rateVal(id){ const el = document.getElementById(id); const n = parseFloat(el.value); return isFinite(n) && n>=0 ? n : 0; }
 
 function compute(){
-  const {row, mode} = getSelectedRow();
+  const {row, mode, leaCode} = getSelectedRow();
   const addlEl = document.getElementById('additionalFunding');
   const additionalN = parseFloat(addlEl.value);
   const additional = isFinite(additionalN) ? additionalN : 0;
@@ -604,21 +618,21 @@ function compute(){
   `).join('') + `<tr class="total"><td colspan="4">Total Operational Funding</td><td class="num">${currency2(totalOpFunding)}</td></tr>`;
 
   // ---- Central Office ----
-  const totalLEACount = Object.keys(REFERENCE_DATA.leas).length;
   const nameForModeCheck = mode==='statewide' ? 'Statewide' : row.school;
   let coMode;
   if(mode==='statewide') coMode = 'statewide';
-  else if(/District/i.test(nameForModeCheck) || /Charter/i.test(nameForModeCheck)) coMode = 'lea';
+  else if(leaCode === DAFB_CODE) coMode = 'dafb'; // not one of the 43 independent LEAs — no LEA-level Central Office
+  else if(mode==='lea' && (DISTRICT_CODE_SET.has(leaCode) || CHARTER_CODE_SET.has(leaCode))) coMode = 'lea';
   else coMode = 'school';
 
-  const superintendent = coMode==='statewide' ? totalLEACount : (coMode==='lea'?1:0);
+  const superintendent = coMode==='statewide' ? REAL_LEA_COUNT : (coMode==='lea'?1:0);
   const adminAssistant = superintendent, bgSupervisor = superintendent, readingCadre = superintendent;
   const asstSupt = mode==='statewide' ? REFERENCE_DATA.statewide.asstSupt : row.asstSupt;
   const director = mode==='statewide' ? REFERENCE_DATA.statewide.director : row.director;
   const foodServiceSup = mode==='statewide' ? REFERENCE_DATA.statewide.foodServiceSup : row.foodServiceSup;
   const d17 = row.totalUnits + row.principal + row.ap + row.instrSupports + row.adminSupportProf;
-  const supervisor11mo = coMode==='school' ? 0 : d17/150;
-  const transportSup = coMode==='school' ? 0 : row.enrollment/7500;
+  const supervisor11mo = (coMode==='school' || coMode==='dafb') ? 0 : d17/150;
+  const transportSup = (coMode==='school' || coMode==='dafb') ? 0 : row.enrollment/7500;
 
   const coRows = [
     {label:"Superintendent", positions:superintendent, rate:R.superintendent},
@@ -639,9 +653,11 @@ function compute(){
 
   document.getElementById('coModeNote').textContent = coMode === 'school'
     ? "An individual school is selected: Superintendent, Administrative Assistant, 11-Month Supervisor, Buildings & Grounds Supervisor, Transportation Supervisor, and Reading Cadre are LEA-level positions and read 0 here. Assistant Superintendent, Director, and Food Services Supervisor are computed per-school in the reference workbook and shown as this school's own share."
+    : coMode === 'dafb'
+    ? "Dover Air Force Base selected: DAFB is not one of the 43 independent LEAs (19 districts + 24 charters) — its own Assistant Superintendent and Director fields are 0 in the reference data, consistent with it not having its own Central Office. All LEA-level positions here read 0 rather than assuming 1."
     : coMode === 'lea'
     ? "Whole-LEA total selected: all Central Office positions apply."
-    : "Statewide selected: Superintendent/Administrative Assistant/Buildings & Grounds/Reading Cadre equal the total LEA count (44, loaded from this dataset — the reference workbook hardcodes 43, see Plan Forward tab). Assistant Superintendent, Director, and Food Services Supervisor are the reference workbook's own precomputed statewide sums.";
+    : "Statewide selected: Superintendent/Administrative Assistant/Buildings & Grounds/Reading Cadre equal 43 — the real count of independent LEAs (19 districts + 24 charters). Dover Air Force Base is excluded, since it isn't one of the 43. This matches the reference workbook's own hardcoded 43. Assistant Superintendent, Director, and Food Services Supervisor are the reference workbook's own precomputed statewide sums.";
 
   // ---- Grand Total ----
   const grandTotal = totalBaseFunding + totalOppFunding + totalOpFunding + totalCOFunding;
@@ -757,8 +773,9 @@ function computeWhatIf(){
     <td><span class="confidence-tag ${r.conf}">${r.conf==='verified'?'Verified':'Pattern-derived'}</span></td></tr>
   `).join('') + `<tr class="total"><td colspan="5">Total Base Funding</td><td class="num">${currency2(totalBaseFunding)}</td></tr>`;
 
-  // ---- Opportunity funding (verified formula) ----
-  const oppPool = 163000000 + additional*0.5;
+  // ---- Opportunity funding (verified formula; pool amount editable to model future years) ----
+  const oppPoolBase = wiNum('wiOppPool');
+  const oppPool = oppPoolBase + additional*0.5;
   const oppRate = oppPool / 32909.315;
   const oppRows = [
     {label:"LI", enroll:enroll.li, weight:0.675},
@@ -766,15 +783,15 @@ function computeWhatIf(){
   ];
   oppRows.forEach(r=>{ r.weighted = r.enroll*r.weight; r.funding = r.weighted*oppRate; });
   const totalOppFunding = oppRows.reduce((a,r)=>a+r.funding,0);
-  document.getElementById('wiOppPoolLabel').textContent = currency2(oppPool);
   document.getElementById('wiOppRateLabel').textContent = currency2(oppRate);
   document.getElementById('wiOppBody').innerHTML = oppRows.map(r=>`
     <tr><td>${r.label}</td><td class="num">${fmt(r.enroll)}</td><td class="num">${r.weight}</td>
     <td class="num">${fmt(r.weighted)}</td><td class="num">${currency2(r.funding)}</td></tr>
   `).join('') + `<tr class="total"><td colspan="4">Total Opportunity Funding</td><td class="num">${currency2(totalOppFunding)}</td></tr>`;
 
-  // ---- Operational funding (verified formula) ----
-  const opPool = 279026800 + additional*0.5;
+  // ---- Operational funding (verified formula; pool amount editable to model future years) ----
+  const opPoolBase = wiNum('wiOpPool');
+  const opPool = opPoolBase + additional*0.5;
   const opRate = opPool / 85986.885;
   const opRows = [
     {label:"Enrollment", enroll:enroll.enrollment, weight:0.2},
@@ -787,7 +804,6 @@ function computeWhatIf(){
   ];
   opRows.forEach(r=>{ r.weighted = r.enroll*r.weight; r.funding = r.weighted*opRate; });
   const totalOpFunding = opRows.reduce((a,r)=>a+r.funding,0);
-  document.getElementById('wiOpPoolLabel').textContent = currency2(opPool);
   document.getElementById('wiOpRateLabel').textContent = currency2(opRate);
   document.getElementById('wiOpBody').innerHTML = opRows.map(r=>`
     <tr><td>${r.label}</td><td class="num">${fmt(r.enroll)}</td><td class="num">${r.weight}</td>
@@ -831,6 +847,8 @@ function computeWhatIf(){
 document.getElementById('wiScope').addEventListener('change', updateWiScopeUI);
 document.getElementById('wiSchoolType').addEventListener('change', computeWhatIf);
 document.getElementById('wiFoodServiceSite').addEventListener('change', computeWhatIf);
+document.getElementById('wiOppPool').addEventListener('input', computeWhatIf);
+document.getElementById('wiOpPool').addEventListener('input', computeWhatIf);
 document.querySelectorAll('#whatif .rate-input').forEach(inp=>inp.addEventListener('input', computeWhatIf));
 
 renderTopBanner();
